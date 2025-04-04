@@ -1,2 +1,0 @@
-# integration with NZ Vault
-hashicorp-vault-plugin:3.8.0

@@ -1,8 +1,0 @@
-# Required by pipeline
-commons-httpclient3-api:3.1-3
-Office-365-Connector:4.20.0
-
-# integration with NZ Vault
-hashicorp-vault-plugin:3.8.0
-resource-disposer:0.23
-ws-cleanup:0.41

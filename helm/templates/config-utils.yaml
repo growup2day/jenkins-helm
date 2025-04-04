@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ include "jenkins.utilsConfigMapName" . }}
-  labels:
-    {{- include "jenkins.labels" . | nindent 4 }}
-data:
-{{ tpl (.Files.Glob "utils/*").AsConfig $ | indent 2 }}

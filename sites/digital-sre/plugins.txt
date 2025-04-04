@@ -1,6 +1,0 @@
-# Digital-sre specific
-ansible:403.v8d0ca_dcb_b_502
-pyenv-pipeline:2.1.2
-ssh-agent:367.vf9076cd4ee21
-http_request:1.18
-mask-passwords:173.v6a_077a_291eb_5

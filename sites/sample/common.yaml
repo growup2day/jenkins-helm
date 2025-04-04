@@ -1,3 +1,0 @@
-# no need for large storage for sample instances
-persistentVolume:
-  storage: 2Gi

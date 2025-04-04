@@ -1,9 +1,0 @@
-JCasC:
-  openshiftClouds:
-    dev:
-      serverUrl: "https://api.cs1-dev.nz.service.test:6443"
-      credentialsId: "cs1-dev-openshift"
-
-  permanentNodes:
-    commonAttributes:
-      remoteFS: "D:\\OPALWorkspaceCS1"

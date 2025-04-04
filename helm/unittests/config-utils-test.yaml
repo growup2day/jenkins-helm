@@ -1,7 +1,0 @@
-templates:
-  - config-utils.yaml
-tests:
-  - it: content should match snapshot
-    asserts:
-      - matchSnapshot:
-          path: data

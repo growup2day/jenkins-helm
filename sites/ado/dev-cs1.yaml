@@ -1,6 +1,0 @@
-# The config that is specific to the dev CS1 cluster
-JCasC:
-  # Slave home directory config
-  permanentNodes:
-    commonAttributes:
-      remoteFS: "/home/x2nzadocicddsa/jenkins/openshift-dev-cs1-home"
