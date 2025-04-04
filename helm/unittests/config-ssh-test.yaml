@@ -1,0 +1,47 @@
+templates:
+  - config-ssh.yaml
+tests:
+  - it: Should create a config map
+    set:
+      ssh:
+        known_hosts: |-
+          host1 with fingerprint
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - isAPIVersion:
+          of: v1
+  - it: Should not create config map if SSH field is not provided
+    asserts:
+      - hasDocuments:
+          count: 0
+  - it: Should set `known_hosts` config map when ssh is configured
+    set:
+      ssh:
+        known_hosts: |-
+          host1 with fingerprint
+          host2 with fingerprint
+    asserts:
+      - equal:
+          path: data
+          value:
+            known_hosts: |-
+              host1 with fingerprint
+              host2 with fingerprint
+  - it: Should allow setting multiple files in the config map when multiple files are configured
+    set:
+      ssh:
+        known_hosts: |-
+          host1 with fingerprint
+          host2 with fingerprint
+        another_file: |-
+          another file in the config map
+    asserts:
+      - equal:
+          path: data
+          value:
+            known_hosts: |-
+              host1 with fingerprint
+              host2 with fingerprint
+            another_file: |-
+              another file in the config map

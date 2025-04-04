@@ -1,0 +1,32 @@
+JCasC:
+  openshiftClouds:
+    kubernetes:
+      simpleTemplates:
+        commonEnvVars:
+          TZ: "Pacific/Auckland"
+          http_proxy: ""
+          https_proxy: ""
+        templates:
+          # Image Repo: https://bitbucket.nz.service.anz/projects/NZDD-OPS/repos/rhcr-jenkins-agent-gradle/browse
+          "Gradle v5.6.4": 
+            label: gradle-v564
+            image:
+              registry: "docker-nzdd-virtual.artifactory-staging.nz.service.anz"
+              path: "rhcr/rhel8/jenkins-agent-gradle:v5.6.4-rev.a"
+            useGoInit: true
+          # Image Repo: https://bitbucket.nz.service.anz/projects/NZDD-OPS/repos/rhcr-jenkins-agent-base/browse
+          "Base Jenkins Agent v4.13.0-1716799461":
+            label: agent jenkins-agent jenkins-agent-base jenkins-agent-v4130
+            image:
+              registry: "docker-nzdd-virtual.artifactory-staging.nz.service.anz"
+              path: "rhcr/rhel8/jenkins-agent-base:v4.13.0-1716799461-rev.a"
+            useGoInit: true
+          # Image Repo: https://bitbucket.nz.service.anz/projects/NZDD-OPS/repos/nzdd-pipeline-cli/browse
+          "Helios v0.4.6-rev.a":
+            label: helios helios-v0.4.6
+            image:
+              registry: "docker-nzdd-virtual.artifactory-staging.nz.service.anz"
+              path: "jenkins/rhel8/jenkins-agent-helios:v0.4.6-rev.a"
+            useGoInit: true
+            containerAttributes:
+              workingDir: "/app"

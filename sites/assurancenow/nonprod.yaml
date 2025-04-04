@@ -1,0 +1,51 @@
+JCasC:
+  vault:
+    vaultUrl: "https://vault-preprod.nzlb.service.test:8200"
+
+  configScripts:
+    anonymous-access: |
+      groovy:
+        - script: |
+            {{- .Files.Get "groovy-lib/anonymous-access-helper.groovy" | nindent 6 }}
+            setAnonymousAccess(["Overall-Read", "Job-Read", "Job-Build", "Job-Cancel", "Agent-Build", "Agent-Connect"] as String[])
+    multibranch-pipeline-jobs: |
+      jobs:
+        - script: |
+            {{- .Files.Get "groovy-lib/multibranch-pipeline-helper.groovy" | nindent 6 }}
+            bitbucketMultibranchPipelineJob(
+              jobName: "build",
+              displayName: "build",
+              project: "AS",
+              repo: "assurancenow",
+              scriptPath: "jenkins-build.jenkinsfile",
+              credentialsId: "bitbucket",
+              pullRequestDiscoveryStrategyId: 2,
+              branchRegex: '^(develop|PR-[0-9]+)$',
+              noTriggerBranchProperty: true,
+              noTriggerBranchPropertyStrategy: "INDEXING",
+              noTriggerBranchPropertyTriggeredBranchesRegex: '^(develop|PR-[0-9]+)$'
+            )
+        - script: |
+            {{- .Files.Get "groovy-lib/pipeline-helper.groovy" | nindent 6 }}
+            bitbucketPipelineJob(
+              jobName: "deploy-prototype",
+              displayName: "deploy-prototype",
+              gitUrl: "https://bitbucket.nz.service.anz/scm/as/assurancenow.git",
+              scriptPath: "jenkins-prototype.jenkinsfile",
+              credentialsId: "bitbucket",
+              branch: "develop",
+              triggerBuildOnPush: false,
+              pollSCMSpec: false,
+            )
+        - script: |
+            {{- .Files.Get "groovy-lib/pipeline-helper.groovy" | nindent 6 }}
+            bitbucketPipelineJob(
+              jobName: "clean-dev",
+              displayName: "clean-dev",
+              gitUrl: "https://bitbucket.nz.service.anz/scm/as/assurancenow.git",
+              scriptPath: "jenkins-dev-clean.jenkinsfile",
+              credentialsId: "bitbucket",
+              branch: "develop",
+              triggerBuildOnPush: false,
+              pollSCMSpec: false,
+            )

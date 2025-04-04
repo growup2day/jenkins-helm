@@ -1,0 +1,254 @@
+persistentVolume:
+  storage: 50Gi
+
+jenkins_java_overrides: -Dmail.smtp.starttls.enable=true -Dmail.smtp.ssl.trust=smtp.anznp.co.nz -Dhudson.model.UpdateCenter.never=true -Dhudson.PluginManager.checkUpdateAttempts=0 -Duser.timezone=Pacific/Auckland
+
+env:
+  # These allow for Vault secrets to be used in the JCasC template.
+  CASC_VAULT_URL: "https://{{ .Values.nzdd.vault.host }}"
+  CASC_VAULT_MOUNT: "{{ .Values.JCasC.vault.mountPath }}"
+  CASC_VAULT_PATHS: "{{ .Values.nzdd.vault.jcascSecretPath }}"
+  CASC_VAULT_NAMESPACE: "{{ .Values.JCasC.vault.namespace }}"
+  CASC_VAULT_KUBERNETES_ROLE: "microservice"
+  
+  # This allows for the Jenkins instance to be configured to use the LDAP plugin.
+  # Also enabled by our bespoke `run` script because there is a bug in the one provided by Redhat.
+  OPENSHIFT_ENABLE_OAUTH: "false"
+  JENKINS_AUTH_PROVIDER: "alternative"
+  
+  # Used so any application running in the namespace can behave differently if required.
+  OCP_CLUSTER: "{{ .Values.nzdd.openshift.cluster }}"
+
+# Explicitly set our custom route (instead of the auto-generated one).
+route:
+  host: "{{ .Values.nzdd.jenkins.host }}"
+
+JCasC:  
+  defaultConfig: true
+
+  # Make these system level environment variables automatically available to every pipeline.
+  # We're already assigning them in the Helm Chart, so might as well since it's costs nothing.
+  envVars:
+    VAULT_URL: "https://{{ .Values.nzdd.vault.host }}"
+    VAULT_HOST: "{{ .Values.nzdd.vault.host }}"
+    VAULT_MOUNT: "{{ .Values.JCasC.vault.mountPath }}"
+    VAULT_NAMESPACE: "{{ .Values.JCasC.vault.namespace }}"
+    VAULT_KUBERNETES_ROLE: "{{ .Values.nzdd.vault.kubernetesRole }}"
+    OCP_CLUSTER: "{{ .Values.nzdd.openshift.cluster }}"
+    JENKINS_DEV_HOST: "{{ .Values.nzdd.jenkins.instances.dev }}"
+    JENKINS_PROD_HOST: "{{ .Values.nzdd.jenkins.instances.prod }}"
+
+  master:
+    mode: NORMAL
+    numExecutors: 5
+
+  openshiftClouds:
+    kubernetes:
+      jenkinsUrl: "http://{{ .Values.nzdd.jenkins.host }}:80"
+      namespace: "{{ .Values.nzdd.openshift.namespace }}"
+      serverUrl: "{{ .Values.nzdd.openshift.apiUrl }}"
+      webSocket: true
+
+  anzBitbucket:
+    enabled: true
+    manageHooks: true
+    crecredentialsId: "bitBucketUsernamePasswordCredentials"
+
+  pipelineLibraries:
+      nzdwPipeline:
+        includeInChangesets: false
+        credentialsId: "bitBucketUsernamePasswordCredentials"
+        repo: "https://bitbucket.nz.service.anz/scm/dn/nzdw_build_utility.git"
+
+  unclassified:
+    bitbucketEndpointConfiguration:
+      endpoints:
+      - bitbucketServerEndpoint:
+          displayName: "ANZ_Bitbucket"
+          manageHooks: false
+
+  configScripts:
+    # Configures the description set on Jenkins homepage
+    set-default-view: |
+      jenkins:
+        views:
+        - all:
+            name: "all"
+            description: "{{ .Values.nzdd.jenkins.banner }}"
+        - list:
+            name: "Backup"
+            columns:
+            {{- range .Values.nzdd.defaultColumns }}
+            - "{{ . }}"
+            {{- end }}
+            description: "# Pipelines for Backing up and Restoring"
+            jobNames:
+            - "Artifactory - Upload Backup"
+            - "Artifactory - Download Backup"
+        viewsTabBar: "standard"
+
+    # Configures content security policy
+    content-security-policy: |
+      groovy:
+        - script: |
+            System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "default-src 'self'; img-src 'self' data:; font-src 'self' data:; style-src 'self' 'unsafe-inline';")
+
+    # Configure the LDAP plugin to avoid OpenShift login flow.
+    ldap-config: |
+      jenkins:
+        securityRealm:
+          ldap:
+            cache:
+              size: 1000
+              ttl: 900
+            configurations:
+            - environmentProperties:
+              - name: "com.sun.jndi.ldap.connect.timeout"
+                value: "20000"
+              - name: "com.sun.jndi.ldap.read.timeout"
+                value: "20000"
+              groupMembershipStrategy:
+                fromGroupSearch:
+                  filter: "(&(objectCategory=group)(member:1.2.840.113556.1.4.1941:={0}))"
+              groupSearchBase: ""
+              groupSearchFilter: "(&(objectclass=group)(cn={0}))"
+              inhibitInferRootDN: false
+              managerDN: "{{ .Values.nzdd.ldap.username }}"
+              managerPasswordSecret: "{{ .Values.nzdd.ldap.password }}"                               
+              rootDN: "OU=NZ,DC={{ .Values.nzdd.ldap.domain }},DC=anz,DC=com"
+              server: "{{ .Values.nzdd.ldap.server }}"
+              userSearch: "sAMAccountName={0}"
+            disableMailAddressResolver: true
+            disableRolePrefixing: true
+            groupIdStrategy: "caseInsensitive"
+            userIdStrategy: "caseInsensitive"
+
+    # Configure the Splunk plugin and all the Jenkins log types to push correctly to Splunk.
+    splunk-plugin: |
+      unclassified:
+        splunkJenkinsInstallation:
+          enabled: true
+          host: "{{ .Values.nzdd.splunk.host }}"
+          port: 8088
+          token: {{ .Values.nzdd.splunk.token }}
+          metadataHost: "{{ .Values.nzdd.jenkins.host }}"
+          splunkAppUrl: "{{ .Values.nzdd.splunk.url }}"
+          useSSL: true
+          rawEventEnabled: true
+          retriesOnError: 3
+          globalPipelineFilter: true
+          maxEventsBatchSize: 262144
+          metaDataConfig: |
+            build_report.index=nzdd
+            build_event.index=nzdd
+            queue_info.index=nzdd
+            jenkins_config.index=nzdd
+            file.index=nzdd
+            sourcetype=json:jenkins_default
+            build_event.sourcetype=json:jenkins_build_event
+            queue_info.sourcetype=json:jenkins_queue_information
+            jenkins_config.sourcetype=jenkins_jenkins_config
+            index=nzdd
+            console_log.index=nzdd
+            console_log.sourcetype=jenkins_console_log
+            slave_info.sourcetype=json:jenkins_agent_information
+            slave_info.index=nzdd
+            file.sourcetype=json:jenkins_log_file
+            build_report.sourcetype=json:jenkins_build_report
+          metadataItemSet:
+          - dataSource: "BUILD_REPORT"
+            keyName: "index"
+            value: "nzdd"
+          - dataSource: "BUILD_EVENT"
+            keyName: "index"
+            value: "nzdd"
+          - dataSource: "QUEUE_INFO"
+            keyName: "index"
+            value: "nzdd"
+          - dataSource: "JENKINS_CONFIG"
+            keyName: "index"
+            value: "nzdd"
+          - dataSource: "FILE"
+            keyName: "index"
+            value: "nzdd"
+          - dataSource: "default"
+            keyName: "sourcetype"
+            value: "json:jenkins_default"
+          - dataSource: "BUILD_EVENT"
+            keyName: "sourcetype"
+            value: "json:jenkins_build_event"
+          - dataSource: "QUEUE_INFO"
+            keyName: "sourcetype"
+            value: "json:jenkins_queue_information"
+          - dataSource: "JENKINS_CONFIG"
+            keyName: "sourcetype"
+            value: "jenkins_jenkins_config"
+          - dataSource: "default"
+            keyName: "index"
+            value: "nzdd"
+          - dataSource: "CONSOLE_LOG"
+            keyName: "index"
+            value: "nzdd"
+          - dataSource: "CONSOLE_LOG"
+            keyName: "sourcetype"
+            value: "jenkins_console_log"
+          - dataSource: "SLAVE_INFO"
+            keyName: "sourcetype"
+            value: "json:jenkins_agent_information"
+          - dataSource: "SLAVE_INFO"
+            keyName: "index"
+            value: "nzdd"
+          - dataSource: "FILE"
+            keyName: "sourcetype"
+            value: "json:jenkins_log_file"
+          - dataSource: "BUILD_REPORT"
+            keyName: "sourcetype"
+            value: "json:jenkins_build_report"
+          scriptContent: "//send job metadata and junit reports with page size set to 50\
+            \ (each event contains max 50 test cases)\r\nsplunkins.sendTestReport(50)\r\n\
+            //send coverage, each event contains max 50 class metrics\r\nsplunkins.sendCoverageReport(50)\r\
+            \n//send all logs from workspace to splunk, with each file size limits to 10MB\r\
+            \nsplunkins.archive(\"**/*.log\", null, false, \"10MB\")\r\n\r\n//end"
+
+    # Signatures for the Splunk scriptContent field.
+    splunk-script-signature: |
+      security:
+        scriptApproval:
+          approvedScriptHashes:
+          - "SHA512:be67253ab691e9830689e6c8ff4e735c2672741166b495340f4b9a63a43a41d7a15e1b906456c18d3eeb457feb2020b9d05119e79cdb0d688ad90cd9dbc7af50"
+          - "SHA512:946fe34aba08cff37a3a82613484567f3a8611ed069ddab97a41002330238ec6c47d147e95c116d0e9a2a8609fe7e0b827a641552c0c9f60512832e3d5d0a87f"
+
+    # Settings for the Thin Backup plugin, which is responsible for backing up Jenkins' Job, User, and Config data.
+    thin-backup-config: |
+      unclassified:
+        thinBackup:
+          backupAdditionalFiles: false
+          backupBuildArchive: true
+          backupBuildResults: true
+          backupBuildsToKeepOnly: false
+          backupConfigHistory: false
+          backupNextBuildNumber: true
+          backupPath: "^${JENKINS_HOME}/thin-backup"
+          backupPluginArchives: false
+          backupUserContents: true
+          cleanupDiff: false
+          failFast: true
+          forceQuietModeTimeout: 120
+          fullBackupSchedule: "H 5 * * 1-5"
+          moveOldBackupsToZipFile: false
+          nrMaxStoredFull: 12
+          waitForIdle: false
+
+    artifactory-plugin-config: |
+      unclassified:
+        artifactoryBuilder:
+          jfrogInstances:
+          - artifactoryUrl: "https://artifactory-staging.nz.service.anz:443/artifactory"
+            bypassProxy: false
+            connectionRetry: 3
+            deployerCredentialsConfig:
+              credentialsId: "ArtifactoryStaging"
+            deploymentThreads: 3
+            instanceId: "artifactory-staging"
+            platformUrl: "https://artifactory-staging.nz.service.anz:443/artifactory"
+          useCredentialsPlugin: true

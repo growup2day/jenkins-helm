@@ -1,0 +1,24 @@
+%%{init: {'theme':'base'}}%%
+flowchart LR
+	CS2-DEV["`
+		CS2-DEV
+		Unstable DEV
+	`"]
+	CS1-DEV["`
+		CS1-DEV
+		Stable DEV
+		(Staging)
+	`"]
+	CS2-PROD["`
+		CS2-PROD
+		Secondary PROD
+		(Failover)
+	`"]
+	CS1-PROD["`
+		CS1-PROD
+		Primary PROD
+	`"]
+
+    CS2-DEV --> CS1-DEV
+    CS1-DEV --> CS2-PROD
+    CS2-PROD --> CS1-PROD

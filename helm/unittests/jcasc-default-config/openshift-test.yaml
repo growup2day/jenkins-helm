@@ -1,0 +1,49 @@
+templates:
+  - config-jcasc.yaml
+tests:
+  - it: should include openshift cluster in default config script when configured
+    set:
+      domain: dummy.domain
+      JCasC:
+        defaultConfig: true
+        openshiftClouds:
+          cs1-dev:
+            serverUrl: "https://api.cs1-dev.nz.service.test:6443"
+            namespace: "{{ .Release.Namespace }}"
+            skipTlsVerify: true
+          cs2-dev:
+            serverUrl: "https://api.cs2-dev.nz.service.test:6443"
+            namespace: "{{ .Release.Namespace }}"
+            skipTlsVerify: false
+    asserts:
+      - isNotNull:
+          path: data.[jcasc-default-config-openshift.yaml]
+      - matchSnapshot:
+          path: data.[jcasc-default-config-openshift.yaml]
+  - it: should include blank cloud in default config script when not configured
+    set:
+      domain: dummy.domain
+      JCasC:
+        defaultConfig: true
+    asserts:
+      - isNotNull:
+          path: data.[jcasc-default-config-openshift.yaml]
+      - matchSnapshot:
+          path: data.[jcasc-default-config-openshift.yaml]
+  - it: should not include cloud config in default config scripts when there is custom config script for the section
+    set:
+      JCasC:
+        defaultConfig: true
+        configScripts:
+          custom-override: |
+            unclassified:
+              openShift:
+                clusterConfigs:
+                  - name: cs1-dev
+                    serverUrl: "https://api.cs1-dev.nz.service.test:6443"
+                    defaultProject: "NAMESPACE"
+    asserts:
+      - isNull:
+          path: data.[jcasc-default-config-openshift.yaml]
+      - isNotNull:
+          path: data.[custom-override.yaml]

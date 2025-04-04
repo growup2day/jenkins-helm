@@ -1,0 +1,113 @@
+customiseRoleMapping:
+  enabled: true
+  mappings:
+    # customise role mapping to grant user with 'view' role the ability to run and cancel jobs
+    Job-Build: view,edit,admin
+    Job-Cancel: view,edit,admin
+
+persistentVolume:
+  storage: 50Gi
+
+JCasC:
+  defaultConfig: true
+
+  master:
+    mode: EXCLUSIVE
+    numExecutors: 0
+    proxy:
+      name: "10.38.34.10"
+      port: 80
+      noProxyHost: |-
+        *.service.dev
+        *.test
+        *.anz
+        *.anznb.co.nz
+
+  anzBitbucket:
+    enabled: true
+
+  vault:
+    enabled: true
+    vaultUrl: "https://vault-preprod.nzlb.service.test:8200/"
+    credentials:
+      bitbucket:
+        kind: vaultUsernamePasswordCredentialImpl
+        scope: GLOBAL
+        description: "API Key for Artifactory"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/bitbucket'
+      cs1-nonprod-openshift:
+        kind: vaultStringCredentialImpl
+        description: "OpenShift service account token for CS1-DEV cluster"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/openshift'
+        scope: GLOBAL
+        vaultKey: "cs1-nonprod-openshift"
+
+  pipelineLibraries:
+    openshiftPipeline:
+      repo: https://bitbucket.nz.service.anz/scm/pipe/openshift-pipeline.git
+      credentialsId: bitbucket
+
+  openshiftClouds:
+    openshift-nonprod:
+      serverUrl: "https://api.cs1-dev.nz.service.test:6443"
+      credentialsId: "cs1-nonprod-openshift"
+      namespace: "{{ .Release.Namespace }}"
+      webSocket: true
+      defaultsProviderTemplate: "default-jenkins-slave"
+      simpleTemplates:
+        commonPodAttributes:
+          idleMinutes: 10
+          instanceCap: 8
+          yamlMergeStrategy: "override"
+        commonContainerAttributes:
+          resourceRequestCpu: "200m"
+          resourceRequestMemory: "500Mi"
+          resourceLimitCpu: "2"
+          resourceLimitMemory: "4Gi"
+        commonEnvVars:
+          TZ: "Pacific/Auckland"
+        templates:
+          default-jenkins-slave:
+            label: "openshift"
+            image:
+              registry: "docker-ose-platform-local.artifactory-staging.nz.service.anz"
+              path: "jenkins-ocp-anz/ose-jenkins-agent-nodejs-12-rhel8:20230623"
+            useGoInit: true
+          master-jenkins-slave:
+            #slave to run for the `node('master')` part of the pipeline - instead of running in the Jenkins master node
+            label: "master"
+            image:
+              registry: "docker-ose-platform-local.artifactory-staging.nz.service.anz"
+              path: "jenkins-ocp-anz/ose-jenkins-agent-nodejs-12-rhel8:20230623"
+            useGoInit: true
+            podAttributes:
+              idleMinutes: 60
+              instanceCap: 5
+              nodeUsageMode: NORMAL
+          nodejs12-jenkins-slave:
+            label: "openshift nodejs12"
+            image:
+              registry: "docker-ose-platform-local.artifactory-staging.nz.service.anz"
+              path: "jenkins-ocp-anz/ose-jenkins-agent-nodejs-12-rhel8:20230623"
+            useGoInit: true
+
+  configScripts:
+    multibranch-pipeline-jobs: |
+      jobs:
+        - script: |
+            {{- .Files.Get "groovy-lib/multibranch-pipeline-helper.groovy" | nindent 6 }}
+            bitbucketMultibranchPipelineJob(
+              jobName: "tech-radar-base",
+              project: "ENG",
+              repo: "tech-radar-base",
+              credentialsId: 'bitbucket',
+              branchRegex: '.*',
+            )
+            bitbucketMultibranchPipelineJob(
+              jobName: "tech-radar",
+              project: "ENG",
+              repo: "tech-radar",
+              credentialsId: 'bitbucket',
+              branchRegex: '.*',
+            )

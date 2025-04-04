@@ -1,0 +1,325 @@
+resources:
+  limits:
+    memory: 8Gi
+
+  requests:
+    memory: 1Gi
+
+customiseRoleMapping:
+  enabled: true
+  mappings:
+    # customise role mapping to grant user with 'view' role the ability to run and cancel jobs
+    Job-Build: view,edit,admin
+    Job-Cancel: view,edit,admin
+
+JCasC:
+  defaultConfig: true
+
+  adminAddress: "NZ Digital Jenkins <nzdigitaljenkinsmail@anz.com>"
+
+  master:
+    mode: NORMAL
+    numExecutors: 5
+
+  proxy:
+    name: "nzswg-app.nz.service.anz"
+    port: 80
+    noProxyHost: |-
+      *.service.dev
+      *.test
+      *.anz
+      *.anznb.co.nz
+
+  quietDown:
+    enableScript: true
+
+  anzBitbucket:
+    enabled: true
+    manageHooks: false
+    credentialsId: bitBucketUsernamePasswordCredentials
+
+  pipelineLibraries:
+    cspPipeline:
+      repo: https://bitbucket.nz.service.anz/scm/dig/csp-pipeline.git
+      credentialsId: bitBucketUsernamePasswordCredentials
+      includeInChangesets: true
+    openshiftPipeline:
+      repo: https://bitbucket.nz.service.anz/scm/pipe/openshift-pipeline.git
+      credentialsId: bitBucketUsernamePasswordCredentials
+      includeInChangesets: true
+    salesforcePipeline:
+      repo: https://bitbucket.nz.service.anz/scm/pipe/salesforce-pipeline.git
+      credentialsId: bitBucketUsernamePasswordCredentials
+      includeInChangesets: true
+    triviaPipeline:
+      repo: https://bitbucket.nz.service.anz/scm/pipe/trivia-pipeline.git
+      credentialsId: bitBucketUsernamePasswordCredentials
+      includeInChangesets: true
+
+  openshiftSync:
+    enabled: false
+
+  envVars:
+    ARTIFACTORY_REPOSITORY_BASE_URL: https://artifactory.nz.service.anz/artifactory
+    dependency_track_server_url: http://dependency-track-4-dependency-track-non-prod.caas.nz.service.test
+    csp_pipeline__disable_email_notifications: 'false'
+    csp_pipeline__disable_slack_notifications: 'false'
+    csp_pipeline__non_admin_user: nzdigitalcicddsa
+    dynatrace_non_prod_server_url: https://nzqdy02v.nz.unix.test:9999/e/ckk60131/
+    dynatrace_prod_server_url: https://nzp2dy4v.nz.unix.anz:9999/e/ece80171/
+
+  vault:
+    credentials:
+      bitBucketUsernamePasswordCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Service account for BitBucket access"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/bitbucket'
+        scope: GLOBAL
+        usernameKey: "username"
+        passwordKey: "password"
+
+      artifactoryUsernameApiKeyCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Username and API Key for Artifactory"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/artifactory'
+        scope: GLOBAL
+        usernameKey: "artifactory_username"
+        passwordKey: "artifactory_api_key"
+      artifactoryStagingUsernameApiKeyCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Username and API Key for Staging Artifactory"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/artifactory'
+        scope: GLOBAL
+        usernameKey: "staging_artifactory_username"
+        passwordKey: "staging_artifactory_api_key"
+      devArtifactoryUsernameApiKeyCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Username and API Key for Dev Artifactory"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/artifactory'
+        scope: GLOBAL
+        usernameKey: "dev_artifactory_username"
+        passwordKey: "dev_artifactory_api_key"
+      testArtifactoryUsernameApiKeyCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Username and API Key for test Artifactory"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/artifactory'
+        scope: GLOBAL
+        usernameKey: "test_artifactory_username"
+        passwordKey: "test_artifactory_api_key"
+
+      proxyUsernamePasswordCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Service account to access the corporate proxy"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/proxy'
+        scope: GLOBAL
+        usernameKey: "username"
+        passwordKey: "password"
+
+      oracle-automation-dev:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Credentials for Oracle dev instance"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/oracle-provisioning'
+        scope: GLOBAL
+        usernameKey: "dev_username"
+        passwordKey: "dev_password"
+      oracle-automation-test:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Credentials for Oracle test instance"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/oracle-provisioning'
+        scope: GLOBAL
+        usernameKey: "test_username"
+        passwordKey: "test_password"
+      oracle-automation-sit:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Credentials for Oracle SIT instance"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/oracle-provisioning'
+        scope: GLOBAL
+        usernameKey: "sit_username"
+        passwordKey: "sit_password"
+      oracle-automation-oat:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Credentials for Oracle OAT instance"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/oracle-provisioning'
+        scope: GLOBAL
+        usernameKey: "oat_username"
+        passwordKey: "oat_password"
+      oracle-automation-hcd-dev:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Credentials for Oracle hcd dev instance"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/oracle-provisioning-hcd'
+        scope: GLOBAL
+        usernameKey: "dev_username"
+        passwordKey: "dev_password"
+      oracle-automation-hcd-test:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Credentials for Oracle hcd test instance"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/oracle-provisioning-hcd'
+        scope: GLOBAL
+        usernameKey: "test_username"
+        passwordKey: "test_password"
+      oracle-automation-hcd-oat:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Credentials for Oracle hcd oat instance"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/oracle-provisioning-hcd'
+        scope: GLOBAL
+        usernameKey: "oat_username"
+        passwordKey: "oat_password"
+
+      slack:
+        kind: vaultStringCredentialImpl
+        description: "Token for Slack Integration"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/slack'
+        scope: GLOBAL
+        vaultKey: "token"
+
+      dynatrace-non-prod-api-key:
+        kind: vaultStringCredentialImpl
+        description: "API key for Dyntrace Non-prod"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/dynatrace'
+        scope: GLOBAL
+        vaultKey: "nonprod-token"
+
+      drivetrain-shared-private-key:
+        kind: vaultStringCredentialImpl
+        description: "private key for Drivetrain"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/drivetrain'
+        scope: GLOBAL
+        vaultKey: "private_key"
+
+      trivia-non-prod-master-token:
+        kind: vaultStringCredentialImpl
+        description: "Master token for Trivia"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/trivia'
+        scope: GLOBAL
+        vaultKey: "non_prod_master_token"
+      trivia-non-prod-kv-write-token:
+        kind: vaultStringCredentialImpl
+        description: "Kv write token for Trivia"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/trivia'
+        scope: GLOBAL
+        vaultKey: "non_prod_kv_write_token"
+
+      dependency-track-api-key:
+        kind: vaultStringCredentialImpl
+        description: "API Key to access dependency track"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/dependency-track'
+        scope: GLOBAL
+        vaultKey: "api_key"
+
+      checkmarx-token:
+        kind: vaultStringCredentialImpl
+        description: "CheckMarx token"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/checkmarx'
+        scope: GLOBAL
+        vaultKey: "token"
+
+      cs1-dev-openshift:
+        kind: vaultStringCredentialImpl
+        description: "OpenShift service account token for CS1-DEV cluster"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/openshift-service-account'
+        scope: GLOBAL
+        vaultKey: "cs1-dev-openshift"
+      cs2-dev-openshift:
+        kind: vaultStringCredentialImpl
+        description: "OpenShift service account token for CS2-DEV cluster"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/openshift-service-account'
+        scope: GLOBAL
+        vaultKey: "cs2-dev-openshift"
+
+  openshiftClouds:
+
+    # OCP4 2 non-prod clusters
+    openshift_cs1_dev:
+      serverUrl: "https://api.cs1-dev.nz.service.test:6443"
+      namespace: "csp-ci"
+      credentialsId: "cs1-dev-openshift"
+      skipTlsVerify: false
+      webSocket: true
+
+    openshift_cs2_dev:
+      serverUrl: "https://api.cs2-dev.nz.service.test:6443"
+      namespace: "csp-ci"
+      credentialsId: "cs2-dev-openshift"
+      skipTlsVerify: false
+      webSocket: true
+
+  configScripts:
+    content-security-policy: |
+      groovy:
+        - script: |
+            System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "default-src 'self'; img-src 'self' data:; font-src 'self' data:; style-src 'self' 'unsafe-inline';")
+    csp-platform-job: |
+      jobs:
+        - script: |
+            {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+            def buildBranchRegex = '{{ .Values.buildBranchRegex }}'
+            bitbucketOrganizationFolder(
+              folderName: "CSP",
+              displayName: "CSP Platform",
+              project: "CSP",
+              credentialsId: "bitBucketUsernamePasswordCredentials",
+              branchRegex: buildBranchRegex,
+            )
+
+DigitalJobsSnippet: |
+  bitbucketOrganizationFolder(
+    folderName: "DIG",
+    displayName: "Digital " + displayNameSuffix,
+    project: "DIG",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    repoRegex: buildRepoRegex,
+    branchRegex: buildBranchRegex,
+  )
+
+CSPJobsSnippet: |
+  bitbucketOrganizationFolder(
+    folderName: "CSPCD",
+    displayName: "Microservice " + displayNameSuffix,
+    project: "CSPCD",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    repoRegex: buildRepoRegex,
+    branchRegex: buildBranchRegex,
+  )
+
+PipelineJobsSnippet: |
+  bitbucketOrganizationFolder(
+    folderName: "PIPE",
+    displayName: "Pipelines " + displayNameSuffix,
+    project: "PIPE",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    repoRegex: buildRepoRegex,
+    branchRegex: buildBranchRegex,
+  )
+
+TriviaJobsSnippet: |
+  bitbucketOrganizationFolder(
+    folderName: "TRIV",
+    displayName: "Trivia Data " + displayNameSuffix,
+    project: "TRIV",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    repoRegex: buildRepoRegex,
+    branchRegex: buildBranchRegex,
+  )
+
+ChannelMicroservicesJobsSnippet: |
+  bitbucketOrganizationFolder(
+    folderName: "CHMS",
+    displayName: "Channel microservices " + displayNameSuffix,
+    project: "CHMS",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    repoRegex: buildRepoRegex,
+    branchRegex: buildBranchRegex,
+  )

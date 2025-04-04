@@ -1,0 +1,13 @@
+JCasC:
+  openshiftClouds:
+    openshift_non_prod:
+      namespace: "bwb-ci"
+      serverUrl: "https://caas-master.nz.service.test:8443"
+      credentialsId: "ocp3-dev-openshift"
+    openshift_production:
+      serverUrl: "https://caas-master.nzlb.service.anz:8443"
+      credentialsId: "ocp3-prod-openshift"
+
+  permanentNodes:
+    commonAttributes:
+      remoteFS: "C:\\AgentWorkspaceOCP3"

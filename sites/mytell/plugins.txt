@@ -1,0 +1,22 @@
+# Required by openshift-pipeline
+ansicolor:1.0.1
+artifactory:3.13.1
+htmlpublisher:1.25
+lockable-resources:2.11
+openshift-client:1.0.35
+slack:2.49
+timestamper:1.13
+
+# Integration with NZ Vault
+hashicorp-vault-plugin:3.8.0
+
+# CSP specific
+checkstyle:4.0.0
+generic-webhook-trigger:1.67
+ansible:1.0
+performance:3.17
+rebuild:1.31
+performance-signature-dynatracesaas:3.1.5
+
+# Allows manual control of build numbers
+next-build-number:1.8

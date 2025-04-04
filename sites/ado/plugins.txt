@@ -1,0 +1,42 @@
+# This file allows plugins to be installed that override or are in addition to the ones in the base ANZ jenkins image:
+# https://bitbucket.nz.service.anz/projects/OP/repos/jenkins/browse/ocp-4.x/jenkins-base/contrib/openshift/base-plugins.txt
+
+# Determining the version of a plugin to use is not straight forward. Each plugin defines its own minimum base jenkins
+# version that it requires, and this requirement is occasionally bumped when a new version of the plugin is released. If
+# the version of jenkins is too old the plugin will fail to load when jenkins starts. This problem can be compounded by
+# plugins that depend on other plugins with higher based jenkins version requirements than their own. Therefore
+# determining the correct version becomes a process of analysing the plugin's github source and jenkins.io page,
+# monitoring the logs of the plugin dependency resolution when openshift builds the base Jenkins image, and
+# checking the "manage jenkins" page in Jenkins for plugin errors once deployed.
+
+
+# ssh-slaves:1.31.6 requires Jenkins 2.282 (https://github.com/jenkinsci/ssh-slaves-plugin/blob/ssh-slaves-1.31.6/pom.xml#L30)
+# whereas ssh-slaves:1.31.5 requires 2.222.4 (https://github.com/jenkinsci/ssh-slaves-plugin/blob/ssh-slaves-1.31.5/pom.xml#L30)
+# See also https://plugins.jenkins.io/ssh-slaves/#releases
+#
+# Requires Jenkins 2.426.3
+ssh-slaves:2.973.v0fa_8c0dea_f9f
+
+# ssh-agent:1.23 requires Jenkins 2.289.1 (https://github.com/jenkinsci/ssh-agent-plugin/blob/ssh-agent-1.23/pom.xml#L62)
+# whereas ssh-agent:1.22 requires 2.222.4 (https://github.com/jenkinsci/ssh-agent-plugin/blob/ssh-agent-1.22/pom.xml#L62)
+# See also https://plugins.jenkins.io/ssh-agent/#releases which fails to mention this at all.
+#
+# Requires Jenkins 2.387.3
+ssh-agent:367.vf9076cd4ee21
+
+# Artifactory Integration. Version 3.13.0 requires Jenkins 2.159 and is the latest at time of upgrading to Jenkins 2.263.3
+# https://plugins.jenkins.io/artifactory/
+#
+# Requires Jenkins 2.263.1
+artifactory:4.0.8
+
+# REST Client. Version 1.11 requires Jenkins 2.222.4 and is the latest at time of upgrading Jenkins 2.263.3
+# https://plugins.jenkins.io/http_request/
+# Requires Jenkins 2.361.4
+# (currently no maintainer on GitHub)
+http_request:1.18
+
+# Integration with NZ Vault
+# Requires Jenkins 2.303.3
+hashicorp-vault-plugin:368.v48134f694db_f
+

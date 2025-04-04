@@ -1,0 +1,20 @@
+should include blank env-vars config in default config scripts when not configured:
+  1: |
+    |-
+      jenkins:
+        # Configure System > Global properties
+        globalNodeProperties:
+          - envVars:
+              env: []
+should include environment variables in default config script when configured:
+  1: |
+    |-
+      jenkins:
+        # Configure System > Global properties
+        globalNodeProperties:
+          - envVars:
+              env:
+                - key: "VAR_NAME_1"
+                  value: "var value 1"
+                - key: "var_2"
+                  value: "var value 2"

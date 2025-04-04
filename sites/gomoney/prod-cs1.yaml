@@ -1,0 +1,8 @@
+JCasC:
+  quietDown:
+    # cs1 cluster contains the backup instance, in quiet down mode by default
+    quietDown: true
+
+  openshiftClouds:
+    openshift_prod:
+      serverUrl: "https://api.cs1.nz.service.anz:6443"

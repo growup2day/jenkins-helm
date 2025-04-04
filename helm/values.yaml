@@ -1,0 +1,408 @@
+# Default values for jenkins.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Domain used as suffix for Jenkins routes, valid values:
+# - OCP3
+#   - nonprod: caas.nz.service.test
+#   - prod: caas.nz.service.anz
+# - OCP4
+#   - nonprod:
+#     - apps.cs1-dev.nz.service.test
+#     - apps.cs2-dev.nz.service.test
+#   - prod:
+#     - apps.cs1.nz.service.anz
+#     - apps.cs2.nz.service.anz
+domain:
+
+# Default environment variables to be configured on the Stateful Set.
+# This is different from the envVars in JCasC, which is used to configure global environment variables in Jenkins.
+env:
+  OPENSHIFT_ENABLE_OAUTH: "true"
+  OPENSHIFT_ENABLE_REDIRECT_PROMPT: "true"
+  KUBERNETES_TRUST_CERTIFICATES: "true"
+  OVERRIDE_PV_PLUGINS_WITH_IMAGE_PLUGINS: "true"
+  # Set Jenkins heap size to be 90% of container avail memory
+  CONTAINER_HEAP_PERCENT: "0.9"
+
+# Default container image registry to be used when referencing Jenkins master or slave images
+# OCP3 internal: docker-registry.default.svc:5000
+# OCP4 internal: image-registry.openshift-image-registry.svc:5000
+defaultImageRegistry: image-registry.openshift-image-registry.svc:5000
+defaultSlaveImage:
+  registry: "" # only required if not the same as defaultImageRegistry
+  path: jenkins-slave-base-ocp-anz/jenkins-slave-base-ocp-test
+  tag: ""
+
+image:
+  registry: "" # only required if not the same as defaultImageRegistry
+  repository: digital-image-builds/jenkins-helm
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+# The following values enable common values for the cloud pod templates definitions,
+# which can be specified in common.yaml or within the [environment].yaml files.
+# The following values are only required in overriding defaultSlaveImage values.
+jenkinsSlaveImage:
+  registry: "" # only required if not the same as defaultSlaveImage.registry
+  path: "" # only required if not the same as defaultSlaveImage.path
+  tag: "" # only required if not the same as defaultSlaveImage.path
+
+serviceAccount:
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+routeAnnotations:
+  {}
+  # Use the following annotation if you get 30s timeout issue from Jenkins
+  # (which happens from time to time for the Job DSL API viewer)
+  # haproxy.router.openshift.io/timeout: 2m
+
+resources:
+  limits:
+    cpu: "2"
+    memory: 4Gi
+  requests:
+    cpu: 200m
+    memory: 500Mi
+
+jnlpService:
+  # Set to true to expose the JNLP service port 50000
+  # Defaulted to false as the latest Jenkins has good support for inbound agents with WebSocket connection.
+  enabled: false
+  # Set a non-zero value to enable the nodePort for the jnlp service.
+  # Required where there are inbound slaves with JNLP4-connect (e.g kubernetes slaves on a different namespace or cluster)
+  nodePort: 0
+
+persistentVolume:
+  # Storage for Jenkin's itself
+  storage: 10Gi
+  additionalVolumes:
+    # You can add additional persistent volume claims for use in slave pods.
+    # Each needs a name and size, and you can reference the name from a pod template
+    # Note that these WILL BE prefixed (with jenkins.fullname) to ensure uniqueness in the case of multiple installs (eg dev jenkins)
+    #   - name: git-reference
+    #     storage: 5gi
+    #     accessMode: ReadWriteMany
+    #   - name: maven-cache
+    #     storage: 10gi
+    #     accessMode: ReadWriteMany
+    []
+  # You can set this to true if you want to prevent your PVC from being deleted after a helm uninstall.
+  # see https://helm.sh/docs/howto/charts_tips_and_tricks/#tell-helm-not-to-uninstall-a-resource
+  preventUninstall: false
+
+# Customise the mapping from OpenShift role to Jenkins permissions
+# see https://github.com/openshift/jenkins-openshift-login-plugin#openshift-role-to-jenkins-permission-mapping
+customiseRoleMapping:
+  # disabled by default to use the plugin's default behaviour
+  enabled: false
+  # Below are the default mappings that should provide the same behaviour as the plugin's default
+  # so that consumers of the chart would only need to change the items they want to customise
+  mappings:
+    # This permission grants the ability to make system-wide configuration changes, as well as perform highly sensitive
+    # operations that amounts to full local system access (within the scope granted by the underlying OS.)
+    Overall-Administer: admin
+    # The read permission is necessary for viewing almost all pages of Jenkins. This permission is useful when you don’t
+    # want unauthenticated users to see Jenkins pages: revoke this permission from the anonymous user, then add
+    # "authenticated" pseudo-user and grant the read access.
+    Overall-Read: view,edit,admin
+    # The create permission is necessary to add credentials to a credentials provider.
+    Credentials-Create: admin
+    # The delete permission is necessary to remove credentials stored in a credentials provider.
+    Credentials-Delete: admin
+    # The manage domains permission is necessary to add/remove/configure the credential domains of a credentials
+    # provider (where the credentials provider supports multiple credential domains).
+    Credentials-ManageDomains: admin
+    # The update permission is necessary to modify credentials in a credentials provider.
+    Credentials-Update: admin
+    # The view permission is necessary to view the credentials stored in a credentials provider.
+    Credentials-View: view,edit,admin
+    # This permission allows users to run jobs as them on agents.
+    Agent-Build: admin
+    # This permission allows users to configure agents.
+    Agent-Configure: admin
+    # This permission allows users to connect agents or mark agents as online.
+    # This permission is implied by Agent/Disconnect.
+    Agent-Connect: admin
+    # This permission allows users to create agents.
+    Agent-Create: admin
+    # This permission allows users to delete existing agents.
+    Agent-Delete: admin
+    # This permission allows users to disconnect agents or mark agents as temporarily offline.
+    Agent-Disconnect: admin
+    # This permission grants the ability to start a new build.
+    Job-Build: edit,admin
+    # This permission grants the ability to cancel a scheduled, or abort a running, build.
+    Job-Cancel: edit,admin
+    # Change the configuration of a job.
+    Job-Configure: edit,admin
+    # Create a new job.
+    Job-Create: edit,admin
+    # Delete a job.
+    Job-Delete: edit,admin
+    # This permission grants discover access to jobs. Lower than read permissions, it allows you to redirect anonymous
+    # users to the login page when they try to access a job url. Without it they would get a 404 error and wouldn't be
+    # able to discover project names.
+    # This permission is implied by Job/Read.
+    Job-Discover: view,edit,admin
+    # Required to move a job from one folder (or Jenkins root) to another.
+    Job-Move: admin
+    # See a job. (You may deny this permission but allow Discover to force an anonymous user to log in to see the job.)
+    Job-Read: view,edit,admin
+    # This permission grants the ability to retrieve the contents of a workspace Jenkins checked out for performing
+    # builds. If you don’t want a user to access files in the workspace (e.g. source code checked out from SCM or
+    # intermediate build results) through the workspace browser, you can revoke this permission.
+    Job-Workspace: edit,admin
+    # This permission allows users to manually delete specific builds from the build history.
+    Run-Delete: admin
+    # Ability to perform a new Pipeline build with an edited script.
+    # This permission is implied by Job/Configure.
+    Run-Replay: admin
+    # This permission allows users to update description and other properties of a build, for example to leave notes
+    # about the cause of a build failure.
+    Run-Update: admin
+    # This permission allows users to change the configuration of views.
+    View-Configure: admin
+    # This permission allows users to create new views.
+    View-Create: admin
+    # This permission allows users to delete existing views.
+    View-Delete: admin
+    # This permission allows users to see views (implied by generic read access).
+    View-Read: admin
+    # This permission allows users to create a new tag in the source code repository for a given build.
+    SCM-Tag: edit,admin
+    # This permission grants access to the health check functionality of the Metrics servlet. Please be aware that
+    # depending on the nature of the health checks in your system, this could be abused to deliver a denial of service
+    # attack if the credentials of a user with this permission become compromised.
+    Metrics-HealthCheck: admin
+    # This permission grants read-only access to the thread dump functionality of the Metrics servlet. Please be aware
+    # that potentially sensitive information in your stack trace, such as job names, will be exposed to users with this
+    # permission.
+    Metrics-ThreadDump: admin
+    # This permission grants read-only access to the Metrics servlet. Please be aware that potentially sensitive
+    # information in your stack trace, such as job names, will be exposed to a wider audience by granting this
+    # permission.
+    Metrics-View: admin
+    # Allows the user to promote a build
+    Artifactory-Promote: admin
+    # Allows the user to run release builds
+    Artifactory-Release: admin
+
+    # # The "Lockable Resources" permission group could not be customised due to this bug
+    # # https://github.com/openshift/jenkins-openshift-login-plugin/issues/123
+    # # This permission grants the ability to manually reserve lockable resources outside of a build.
+    # Lockable_Resource-Reserve: admin
+    # # This permission grants the ability to manually unlock resources that have been locked by builds.
+    # Lockable_Resource-Unlock: admin
+    # # This permission grants the ability to view lockable resources.
+    # Lockable_Resource-View: admin
+
+# Below is the implementation of Jenkins Configuration as Code.
+#
+# Default config:
+#   To be implemented - to provide simpler way to construct common configurations
+#
+# Custom config scripts:
+#   Add a key under configScripts for each configuration area, where each corresponds to a plugin or section of the UI.
+#   Each key (prior to | character) is just a label, and can be any value.
+#
+#   Keys are only used to give the section a meaningful name. The only restriction is they may only contain RFC 1123 DNS
+#   label characters: lowercase letters, numbers, and hyphens. The keys become the name of a configuration yaml file in
+#   /var/lib/jenkins-casc and will be processed by the Configuration as Code Plugin.
+#
+#   The lines after each | become the content of the configuration yaml file. The first line after this is a JCasC root
+#   element, eg jenkins, credentials, etc. Best reference is https://<jenkins_url>/configuration-as-code/reference.
+#   The script content can reference Helm values, built-in variables, and helper variables.
+JCasC:
+  configScripts:
+    # # The example below creates a welcome message:
+    # welcome-message: |
+    #   jenkins:
+    #     systemMessage: Welcome to our CI CD server. This Jenkins is configured and managed 'as code'.
+    # # The example below enables anonymous access to Jenkins
+    # anonymous-access: |
+    #   groovy:
+    #     - script: |
+    #         {{- .Files.Get "groovy-lib/anonymous-access-helper.groovy" | nindent 6 }}
+    #         setAnonymousAccess(["Overall-Read", "Job-Read"] as String[])
+
+  # default CasC configs to make common setups easier
+  defaultConfig: false
+
+  # Notification e-mails from Jenkins to project owners will be sent from this address
+  adminAddress: ""
+
+  # configuration values used by the default config script
+  master:
+    # number of executors on Jenkins master (it's not recommended to enable this as there is potential security risk)
+    numExecutors: 0
+    # master executor mode (NORMAL=Use as much as possible, EXCLUSIVE=Only when label match)
+    mode: NORMAL
+
+    # set if Jenkins master needs to connect to the internet (e.g. for Slack integration)
+    proxy:
+      # name: "10.38.141.33"
+      # port: 80
+      # noProxyHost: |-
+      #   *.service.dev
+      #   *.test
+      #   *.anz
+      #   *.anznb.co.nz
+
+  # Set to true to put the Jenkins instance into quiet-down mode
+  quietDown:
+    enableScript: false
+    quietDown: false
+    quietDownMessage: This is currently the backup Jenkins instance, use the instance in the other cluster instead.
+
+  # Set to configure ANZ BitBucket server
+  anzBitbucket:
+    enabled: false
+    manageHooks: false
+    credentialsId: # credential used to manage hooks
+
+  # Set to configure SlackNotifier plugin
+  slackNotifier:
+    credentialId:
+
+  # Set to configure SlackNotifier plugin
+  pipelineLibraries:
+    # openshiftPipeline:
+    #   repo: https://bitbucket.nz.service.anz/scm/pipe/openshift-pipeline.git
+    #   credentialsId: "bitbucket"
+    #   includeInChangesets: false
+
+  # enable openshift-sync plugin to synchronise OpenShfift builds, secrets, etc. to Jenkins
+  openshiftSync:
+    enabled: false
+
+  # set to configure global environment variables
+  envVars:
+    # VAR_NAME_1: "var value"
+    # VAR_NAME_2: "var value"
+
+  # Hashicorp Vault configurations
+  vault:
+    enabled: true
+    vaultUrl: "https://vault.nzlb.service.anz:8200"
+    credentialId: vault-auth
+    namespace: # prod/nonprod
+    mountPath: kubernetes # set to kubernetes-cs1 or kubernetes-cs2 when on OCP4
+    role: microservice
+    credentials:
+      # artifactory-api-key:
+      #   kind: vaultUsernamePasswordCredentialImpl
+      #   scope: GLOBAL
+      #   description: "API Key for Artifactory"
+      #   path:
+      #     'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/pairs/artifactory-api-key'
+      # fortify-ci-token:
+      #   kind: vaultStringCredentialImpl
+      #   scope: GLOBAL
+      #   description: "CI Token for Fortify"
+      #   path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+      #   vaultKey: "fortify-ci-token"
+
+  # Configure Kubernetes plugin as well as and OpenShift client
+  openshiftClouds:
+    # dev: # name of the openshift cloud, when using the openshift-pipeline Jenkins library, this needs to match the OpenshiftCluster name defined there for the team defaults
+    #   serverUrl: "https://api.cs2-dev.nz.service.test:6443/"
+    #   namespace: "{{ .Release.Namespace }}"
+    #   credentialsId: "dev-openshift-credential" # optional, only needed for cloud other than the one Jenkins master runs on
+    #   skipTlsVerify: false
+    #   webSocket: true # recommended, as it avoids the need for nodePorts when the agent is running on a different namespace or cluster
+    #   # simple pod template generation for single-container slave
+    #   # allowing reuse of common pod/container attributes to make defining simple templates easy.
+    #   simpleTemplates: # optional, only when using global-defined pod template instead of defining in the pipeline
+    #     commonPodAttributes:
+    #       idleMinutes: 30
+    #       instanceCap: 8
+    #       yamlMergeStrategy: "override"
+    #     commonContainerAttributes:
+    #       resourceRequestCpu: "200m"
+    #       resourceRequestMemory: "500Mi"
+    #       resourceLimitCpu: "2"
+    #       resourceLimitMemory: "4Gi"
+    #       workingDir: "/tmp"
+    #     commonEnvVars:
+    #       TZ: "Pacific/Auckland"
+    #       http_proxy: ""
+    #       https_proxy: ""
+    #     templates:
+    #       master-jenkins-slave:
+    #         # slave to run for the `node('master')` part of the pipeline - instead of running in the Jenkins master node
+    #         # because it's a security risk running jobs on the master node
+    #         # see https://wiki.jenkins.io/display/JENKINS/Security+implication+of+building+on+master
+    #         label: "master python oc jq skopeo"
+    #         image:
+    #           registry: "docker-ose-platform-local.artifactory-staging.nz.service.anz"
+    #           path: "jenkins-slave-base-ocp-anz/jenkins-slave-base-ocp-anz:v4.9.1"
+    #         useGoInit: true
+    #         podAttributes:
+    #           idleMinutes: 60
+    #           instanceCap: 5
+    #           nodeUsageMode: NORMAL
+    #       maven-jenkins-slave: # the key becomes the pod template name
+    #         label: "openshift maven"
+    #         image:
+    #           registry: "" # only required if not the same as defaultImageRegistry
+    #           path: "openshift/jenkins-slave-maven-ocp-anz:v4.7.2"
+    #         serviceAccount: "" # optional, only if different from Jenkins master's service account name
+    #         useGoInit: false # the go-init script is the new standard, see https://github.com/openshift/jenkins/tree/master/2/go-init
+    #         envVars: # environment variables specific to this pod template, overrides commonPodAttributes when different
+    #           CONCURRENT_BUILD_TASKS: "2"
+    #         podAttributes: # attributes specific to this pod template, overrides commonPodAttributes when different
+    #           idleMinutes: 10
+    #         containerAttributes: # attributes specific to this pod template, overrides commonContainerAttributes when different
+    #           resourceLimitCpu: "4"
+
+  # Configure permanent outbound SSH agents
+  permanentNodes:
+    enabled: false
+    commonAttributes:
+    #   mode: NORMAL
+    #   numExecutors: 1
+    #   nodeProperties:
+    #     - toolLocation:
+    #         locations:
+    #           - home: "/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.75.x86_64"
+    #             key: "hudson.model.JDK$DescriptorImpl@JDK 1.7"
+    #           - home: "/usr/lib/jvm/java-1.8.0"
+    #             key: "hudson.model.JDK$DescriptorImpl@JDK 1.8"
+    #   remoteFS: "/app/data/jenkins-slave"
+    #   retentionStrategy: "always"
+    agents:
+      # Agents by default will use ssh launcher
+      # nzdwXXXv:
+      #   host: "nzdwXXXv.nz.unix.test"
+      #   credentialsId: "jenkins-slave-cred"
+      #   labelString: "nzdwXXXv vm maven chrome"
+      #   hostKey: "ssh-rsa host-public-rsa-key"
+      # To configure agent to use jnlp launcher
+      # nzdwXXXv:
+      #   launcherType: "jnlp"
+      #   jnlpTunnel: "openshift-jenkins-jnlp.caas.nz.service.test:30980"
+
+  # Used to approve a list of groovy functions in pipelines used the script-security plugin. Can be viewed under /scriptApproval
+  scriptApproval: []
+  #  - "method groovy.json.JsonSlurperClassic parseText java.lang.String"
+  #  - "new groovy.json.JsonSlurperClassic"
+
+  # Configure mailer plugin
+  mailer:
+    smtpHost:
+
+# Add (read-only) files to the /var/lib/jenkins/.ssh folder via a config map.
+ssh:
+  # known_hosts: |
+  #   host1 with fingerprint
+  #   host2 with fingerprint
+  # another_file: |
+  #   another file in the config map

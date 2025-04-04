@@ -1,0 +1,179 @@
+default manifest should match snapshot:
+  1: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: RELEASE-NAME-jenkins
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+Should match snapshot when 'preventUninstall' is false for one additional volume:
+  1: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: RELEASE-NAME-jenkins
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 7Gi
+  2: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: RELEASE-NAME-jenkins-maven-volume
+    spec:
+      accessModes:
+      - ReadWriteMany
+      resources:
+        requests:
+          storage: 3Gi
+Should match snapshot when 'preventUninstall' is set on multiple additional volumes:
+  1: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: RELEASE-NAME-jenkins
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 7Gi
+  2: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        helm.sh/resource-policy: keep
+      name: RELEASE-NAME-jenkins-maven-volume
+    spec:
+      accessModes:
+      - ReadWriteMany
+      resources:
+        requests:
+          storage: 3Gi
+  3: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: RELEASE-NAME-jenkins-gitref-volume
+    spec:
+      accessModes:
+      - ReadWriteMany
+      resources:
+        requests:
+          storage: 3Gi
+Should match snapshot when 'preventUninstall' is true for one additional volume:
+  1: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: RELEASE-NAME-jenkins
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 7Gi
+  2: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        helm.sh/resource-policy: keep
+      name: RELEASE-NAME-jenkins-gitref-volume
+    spec:
+      accessModes:
+      - ReadOnlyMany
+      resources:
+        requests:
+          storage: 2Gi
+Should match snapshot when 'preventUninstall' is true for persistentVolume:
+  1: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      annotations:
+        helm.sh/resource-policy: keep
+      name: RELEASE-NAME-jenkins
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+default manifest should match snapshot:
+  1: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: RELEASE-NAME-jenkins
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+multiple additional volumes should match snapshot:
+  1: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: RELEASE-NAME-jenkins
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 7Gi
+  2: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: RELEASE-NAME-jenkins-gitref-volume
+    spec:
+      accessModes:
+      - ReadOnlyMany
+      resources:
+        requests:
+          storage: 2Gi
+  3: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: RELEASE-NAME-jenkins-maven-volume
+    spec:
+      accessModes:
+      - ReadWriteMany
+      resources:
+        requests:
+          storage: 3Gi
+single additional volume should match snapshot:
+  1: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: RELEASE-NAME-jenkins
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 7Gi
+  2: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: RELEASE-NAME-jenkins-gitref-volume
+    spec:
+      accessModes:
+      - ReadOnlyMany
+      resources:
+        requests:
+          storage: 2Gi

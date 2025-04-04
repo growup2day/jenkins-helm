@@ -1,0 +1,334 @@
+persistentVolume:
+    storage: 50Gi
+
+jenkins_java_overrides: -Dmail.smtp.starttls.enable=true -Dmail.smtp.ssl.trust=smtp.anznp.co.nz
+
+
+JCasC:
+    envVars:
+        OPENSHIFT_BUILD_NAMESPACE: "integ-ops-build"
+        JENKINS_SERVICE_NAME: "jenkins-dp"
+        dynatrace_url: "https://nzqdy02v.nz.unix.test:9999/e/ckk60131/"
+        #artifactory config variables
+        Artifactory_Credentials_Id: "integrationnpmdsa"
+        Artifactory_User_Id: "nzintegrationnpmdsa"
+        Artifactory_Backup: "https://artifactory-staging.nz.service.anz/artifactory/generic-datapower-restore-backups-local/NonSecureBackups/"
+        ARTIFACTORY_GETURL: "https://artifactory.nz.service.test/artifactory/api/replication/npm-anz-integration-remote"
+        ARTIFACTORY_POSTURL: "https://artifactory.nz.service.test/artifactory/api/replication/execute/npm-anz-integration-remote"
+        ARTIFACTORY_SYNC: "yes"
+        Artifactory_URL: "https://artifactory-staging.nz.service.anz/artifactory"
+        #Other environment variables.
+        DEV01: "dpanz301akl0001-mgt.apps.anznb.co.nz"
+        dev-eth20: "10.106.146.138"
+        DEV: "dpanz301akl0001-mgt.apps.anznb.co.nz"
+        dpanz301akl0004: "10.106.205.82"
+        lab: "10.106.205.56"
+        oat03: "dpanz061oat03-mgt.apps.anznb.co.nz"
+        oat04: "dpanz061oat04-mgt.apps.anznb.co.nz"
+        oat05: "dpanz061oat05-mgt.apps.anznb.co.nz"
+        oat06: "dpanz061oat06-mgt.apps.anznb.co.nz"
+        sit: "dpanz061tst01-mgt.apps.anznb.co.nz"
+        sit01: "dpanz061tst01-mgt.apps.anznb.co.nz"
+        sit01-eth20: "10.106.166.83"
+        sit02: "dpanz201akl0001-mgt.apps.anznb.co.nz"
+        sit02-eth20: "10.106.166.157"
+        dependency_track_server_url: "http://dependency-track-4-dependency-track-non-prod.caas.nz.service.test/"
+        BACKUP_HOME: "/var/lib/jenkins/backups"
+        disable_email_notifications: "false"
+        disable_slack_notifications: "false"
+        DPBUDDY_HOME: "/opt/dpbuddy-3.5"
+        PATH+DPBUDDY_HOME: "/opt/dpbuddy-3.5/bin"
+        dynatrace_non_prod_server_url: "https://nzqdy02v.nz.unix.test:9999/e/ckk60131/"
+        SERVICE_SSL_CERT_DIR: "/opt/certs"
+        Vault_URL: "https://vault-preprod.nzlb.service.test:8200"
+  
+    vault:
+        enabled: true
+        vaultUrl: "https://vault-preprod.nzlb.service.test:8200"
+        credentialId: vault-auth
+        namespace: nonprod
+        mountPath: kubernetes-cs1 # set to kubernetes-cs1 or kubernetes-cs2 when on OCP4
+        role: microservice
+        scope: GLOBAL
+        credentials:
+          integrationnpmdsa:
+            kind: vaultUsernamePasswordCredentialImpl
+            description: "artifactory sync usr id and password"
+            path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/pairs/integrationnpmdsa'
+            scope: GLOBAL
+            usernameKey: "username"
+            passwordKey: "password"
+          kafkaClusterServiceAccountCredentials:
+            kind: vaultUsernamePasswordCredentialImpl
+            description: "kafkaClusterServiceAccountCredentials"
+            path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/pairs/kafkaClusterServiceAccount'
+            scope: GLOBAL
+            usernameKey: "username"
+            passwordKey: "password"
+          dynatrace-non-prod-api-key:
+            kind: vaultStringCredentialImpl
+            description: "API key for Dynatrace Non-prod"
+            path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+            scope: GLOBAL
+            vaultKey: "dynatrace-non-prod-api-key"
+          transservPassword:
+            kind: vaultStringCredentialImpl
+            description: "credential used by mod service developed by integration dev team"
+            path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+            scope: GLOBAL
+            vaultKey: "transservPassword"
+          transOATPassword:
+            kind: vaultStringCredentialImpl
+            description: "credential used by mod service developed by integration dev team"
+            path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+            scope: GLOBAL
+            vaultKey: "transOATPassword"
+          xpressOATPassword:
+            kind: vaultStringCredentialImpl
+            description: "credential used by mod service developed by integration dev team"
+            path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+            scope: GLOBAL
+            vaultKey: "xpressOATPassword"
+          xpressSITPassword:
+            kind: vaultStringCredentialImpl
+            description: "credential used by mod service developed by integration dev team"
+            path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+            scope: GLOBAL
+            vaultKey: "xpressSITPassword"
+          foldDevPassword:
+            kind: vaultStringCredentialImpl
+            description: "credential used by mod service developed by integration dev team"
+            path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+            scope: GLOBAL
+            vaultKey: "foldDevPassword"
+          foldOATPassword:
+            kind: vaultStringCredentialImpl
+            description: "credential used by mod service developed by integration dev team"
+            path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+            scope: GLOBAL
+            vaultKey: "foldOATPassword"
+          foldSITPassword:
+            kind: vaultStringCredentialImpl
+            description: "credential used by mod service developed by integration dev team"
+            path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+            scope: GLOBAL
+            vaultKey: "foldSITPassword"
+          dxcSITPassword:
+            kind: vaultStringCredentialImpl
+            description: "credential used by mod service developed by integration dev team"
+            path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+            scope: GLOBAL
+            vaultKey: "dxcSITPassword"
+          dxcIMASITPassword:
+            kind: vaultStringCredentialImpl
+            description: "credential used by mod service developed by integration dev team"
+            path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+            scope: GLOBAL
+            vaultKey: "dxcIMASITPassword"
+          dxcIMAOATPassword:
+            kind: vaultStringCredentialImpl
+            description: "credential used by mod service developed by integration dev team"
+            path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+            scope: GLOBAL
+            vaultKey: "dxcIMAOATPassword"
+          dxcOATPassword:
+            kind: vaultStringCredentialImpl
+            description: "credential used by mod service developed by integration dev team"
+            path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+            scope: GLOBAL
+            vaultKey: "dxcOATPassword"
+          FXEasyOATPassword:
+            kind: vaultStringCredentialImpl
+            description: "credential used by mod service developed by integration dev team"
+            path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+            scope: GLOBAL
+            vaultKey: "FXEasyOATPassword"
+    
+    configScripts:      
+        non-prod-jobs: |
+            jobs:
+              - script: |
+                  {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+                  def buildBranchRegex = 'master'
+                  {{- tpl $.Values.modLibrariesJobSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.nodejsLibrariesJobSnippet $ | nindent 6 }}
+        datapower-ops-job: |
+            jobs:
+              - script: |
+                  {{- .Files.Get "groovy-lib/pipeline-helper.groovy" | nindent 6 }}
+                  def buildBranchRegex = 'master'
+                  {{- tpl $.Values.tcpConnectionTestPipelineJobSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.artifactoryBackupUploadPipelineJobSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.artifactorySyncPipelineJobSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.backupandRestorePipelineJobSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.deviceremovalfromloadblancerPipelineJobSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.cleanWorkspacesPipelineJobSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.download_NMon_dataPipelineJobSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.dpBackup_corpPipelineJobSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.dp_rebootPipelineJobSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.dp_errorReportPipelineJobSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.dp_packetCapturePipelineJobSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.dp_quiesce_unquiescePipelineJobSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.dp_scheduleBackup_trigger_uploadPipelineJobSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.dp_Mod_Version_ListPipelineJobSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.dp_schedule_nmon_downloadPipelineJobSnippet $ | nindent 6 }}
+        openshiftPipeline-job: |
+            jobs:
+              - script: |
+                  {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+                  def buildBranchRegex = 'feature.*|bugfix.*|hotfix.*'
+                  {{- tpl $.Values.openshiftPipelineJobSnippet $ | nindent 6 }}
+        mod-api-ci-job: |
+            jobs:
+              - script: |
+                  {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+                  bitbucketOrganizationFolder(
+                    folderName: "MOD APIs - CI",
+                    displayName: "MOD APIs - CI",
+                    credentialsId: "bitBucketUsernamePasswordCredentials",
+                    repoRegex: "^((?!.*config-.*|.*lib-.*).)*",
+                    project: "INT",
+                    scriptPath: "Jenkinsfile-ci",   
+                    branchRegex: "master",
+                    periodicScanInterval: '1d',
+                    branchNamesToBuildAutomaticallyRegex: "",
+                  )
+        mod-api-sit-job: |
+            jobs:
+              - script: |
+                  {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+                  bitbucketOrganizationFolder(
+                    folderName: "MOD APIs - SIT",
+                    displayName: "MOD APIs - SIT",
+                    credentialsId: "bitBucketUsernamePasswordCredentials",
+                    repoRegex: "^((?!.*config-.*|.*lib-.*).)*",
+                    project: "INT",
+                    scriptPath: "Jenkinsfile-sit",   
+                    branchRegex: "master",
+                    periodicScanInterval: '1d',
+                    branchNamesToBuildAutomaticallyRegex: "",
+                  )
+        mod-api-oat-job: |
+            jobs:
+              - script: |
+                  {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+                  bitbucketOrganizationFolder(
+                    folderName: "MOD APIs - OAT",
+                    displayName: "MOD APIs - OAT",
+                    credentialsId: "bitBucketUsernamePasswordCredentials",
+                    repoRegex: "^((?!.*config-.*|.*lib-.*).)*",
+                    project: "INT",
+                    scriptPath: "Jenkinsfile-oat",   
+                    branchRegex: "master",
+                    periodicScanInterval: '1d',
+                    branchNamesToBuildAutomaticallyRegex: "",
+                  )
+        mod-config-ci-job: |
+            jobs:
+              - script: |
+                  {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+                  bitbucketOrganizationFolder(
+                    folderName: "MOD Config - CI",
+                    displayName: "MOD Config - CI",
+                    credentialsId: "bitBucketUsernamePasswordCredentials",
+                    repoRegex: "config-.*",
+                    project: "INT",
+                    scriptPath: "Jenkinsfile-ci",   
+                    branchRegex: "master",
+                    periodicScanInterval: '1d',
+                    branchNamesToBuildAutomaticallyRegex: "",
+                  )
+        mod-config-sit-job: |
+            jobs:
+              - script: |
+                  {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+                  bitbucketOrganizationFolder(
+                    folderName: "MOD Config - SIT",
+                    displayName: "MOD Config - SIT",
+                    credentialsId: "bitBucketUsernamePasswordCredentials",
+                    repoRegex: "config-.*",
+                    project: "INT",
+                    scriptPath: "Jenkinsfile-sit",   
+                    branchRegex: "master",
+                    periodicScanInterval: '1d',
+                    branchNamesToBuildAutomaticallyRegex: "",
+                  )
+        mod-config-oat-job: |
+            jobs:
+              - script: |
+                  {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+                  bitbucketOrganizationFolder(
+                    folderName: "MOD Config - OAT",
+                    displayName: "MOD Config - OAT",
+                    credentialsId: "bitBucketUsernamePasswordCredentials",
+                    repoRegex: "config-.*",
+                    project: "INT",
+                    scriptPath: "Jenkinsfile-oat",   
+                    branchRegex: "master",
+                    periodicScanInterval: '1d',
+                    branchNamesToBuildAutomaticallyRegex: "",
+                  )
+        makinui-acceptance-job: |
+            jobs:
+              - script: |
+                  {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+                  bitbucketOrganizationFolder(
+                    folderName: "Makinui - Acceptance",
+                    displayName: "Makinui - Acceptance",
+                    credentialsId: "bitBucketUsernamePasswordCredentials",
+                    repoRegex: ".*",
+                    project: "INT",
+                    scriptPath: "makinui/Jenkinsfile-acceptance",   
+                    branchRegex: "master",
+                    periodicScanInterval: '1d',
+                    branchNamesToBuildAutomaticallyRegex: "",
+                  )
+        makinui-rehearsal-job: |
+            jobs:
+              - script: |
+                  {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+                  bitbucketOrganizationFolder(
+                    folderName: "Makinui - Rehearsal",
+                    displayName: "Makinui - Rehearsal",
+                    credentialsId: "bitBucketUsernamePasswordCredentials",
+                    repoRegex: ".*",
+                    project: "INT",
+                    scriptPath: "makinui/Jenkinsfile-rehearsal",   
+                    branchRegex: "master",
+                    periodicScanInterval: '1d',
+                    branchNamesToBuildAutomaticallyRegex: "",
+                  )
+        makinui-acceptance-features-job: |
+            jobs:
+              - script: |
+                  {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+                  bitbucketOrganizationFolder(
+                    folderName: "Makinui - Acceptance - Features",
+                    displayName: "Makinui - Acceptance - Features",
+                    credentialsId: "bitBucketUsernamePasswordCredentials",
+                    repoRegex: ".*",
+                    project: "INT",
+                    scriptPath: "makinui/Jenkinsfile-acceptance",   
+                    branchRegex: "feature.*|bugfix.*",
+                    periodicScanInterval: '1d',
+                    branchNamesToBuildAutomaticallyRegex: "",
+                  )
+        makinui-union-job: |
+            jobs:
+              - script: |
+                  {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+                  bitbucketOrganizationFolder(
+                    folderName: "Makinui - Union",
+                    displayName: "Makinui - Union",
+                    credentialsId: "bitBucketUsernamePasswordCredentials",
+                    repoRegex: ".*",
+                    project: "INT",
+                    scriptPath: "makinui/Jenkinsfile-union",   
+                    branchRegex: "master",
+                    periodicScanInterval: '1d',
+                    branchNamesToBuildAutomaticallyRegex: "",
+                  )
+
+    mailer:
+        smtpHost: smtp.anznp.co.nz
+        smtpPort: 25

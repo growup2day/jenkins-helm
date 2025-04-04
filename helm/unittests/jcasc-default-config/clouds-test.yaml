@@ -1,0 +1,104 @@
+templates:
+  - config-jcasc.yaml
+tests:
+  - it: should include openshift cloud in default config script when configured
+    set:
+      domain: dummy.domain
+      JCasC:
+        defaultConfig: true
+        openshiftClouds:
+          cs1-dev:
+            serverUrl: "https://api.cs1-dev.nz.service.test:6443"
+            namespace: "{{ .Release.Namespace }}"
+            credentialsId: "cs1-dev-cred"
+            webSocket: true
+            defaultsProviderTemplate: "default-jenkins-slave"
+            simpleTemplates:
+              commonPodAttributes:
+                idleMinutes: 30
+                instanceCap: 8
+                yamlMergeStrategy: "override"
+              commonContainerAttributes:
+                resourceRequestCpu: "200m"
+                resourceRequestMemory: "500Mi"
+                resourceLimitCpu: "2"
+                resourceLimitMemory: "4Gi"
+              commonEnvVars:
+                TZ: "Pacific/Auckland"
+                http_proxy: ""
+                https_proxy: ""
+              templates:
+                default-jenkins-slave:
+                  label: "openshift"
+                  image:
+                    path: "openshift/jenkins-slave-base-ocp-anz:v4.7.2"
+                maven-jenkins-slave: # minimal definition
+                  label: "openshift maven"
+                  image:
+                    path: "openshift/jenkins-slave-maven-ocp-anz:v4.7.2"
+                nodejs-jenkins-slave: # testing for common attributes override
+                  label: "openshift nodejs"
+                  image:
+                    path: "openshift/jenkins-slave-nodejs-ocp-anz:v4.7.2"
+                  useGoInit: true
+                  podAttributes:
+                    idleMinutes: 10
+                  containerAttributes:
+                    resourceLimitCpu: "4"
+                    workingDir: "/tmp"
+                  envVars:
+                    https_proxy: "test.proxy"
+                    CONCURRENT_BUILD_TASKS: "2"
+          cs2-dev:
+            serverUrl: "https://api.cs2-dev.nz.service.test:6443"
+            namespace: "{{ .Release.Namespace }}"
+            webSocket: false
+    asserts:
+      - isNotNull:
+          path: data.[jcasc-default-config-clouds.yaml]
+      - matchSnapshot:
+          path: data.[jcasc-default-config-clouds.yaml]
+  - it: should reference nodePort when the Jenkins master is configured with it
+    set:
+      domain: dummy.domain
+      jnlpService:
+        enabled: true
+        nodePort: 33123
+      JCasC:
+        defaultConfig: true
+        openshiftClouds:
+          cs1-dev:
+            serverUrl: "https://api.cs1-dev.nz.service.test:6443"
+            namespace: "{{ .Release.Namespace }}"
+            credentialsId: "cs1-dev-cred"
+    asserts:
+      - isNotNull:
+          path: data.[jcasc-default-config-clouds.yaml]
+      - matchSnapshot:
+          path: data.[jcasc-default-config-clouds.yaml]
+  - it: should include blank cloud in default config script when not configured
+    set:
+      domain: dummy.domain
+      JCasC:
+        defaultConfig: true
+    asserts:
+      - isNotNull:
+          path: data.[jcasc-default-config-clouds.yaml]
+      - matchSnapshot:
+          path: data.[jcasc-default-config-clouds.yaml]
+  - it: should not include cloud config in default config scripts when there is custom config script for the section
+    set:
+      JCasC:
+        defaultConfig: true
+        configScripts:
+          custom-override: |
+            jenkins:
+              clouds:
+                - kubernetes:
+                    name: cs1-dev
+                    serverUrl: "https://api.cs1-dev.nz.service.test:6443"
+    asserts:
+      - isNull:
+          path: data.[jcasc-default-config-clouds.yaml]
+      - isNotNull:
+          path: data.[custom-override.yaml]

@@ -1,0 +1,99 @@
+pipeline {
+    agent { label 'helm-agent' }
+    environment {
+        OCP_CREDS_DEV = credentials('nzddjenkinsdsa')
+        OCP_CREDS_PROD = credentials('prod_nzddjenkinsdsa')
+    }
+    parameters {
+        choice(
+            name: 'DEPLOY_ENV', 
+            choices: ['Select Environment', 'cs1-dev-test', 'cs2-dev-test', 'cs1-dev', 'cs1-prod', 'cs2-prod-test'],
+            description: 'Select the deployment environment.'
+        )
+        string(
+            name: 'DEPLOY_BRANCH_NAME', 
+            defaultValue: 'feature/nzdw-base', 
+            description: 'Branch name of the Jenkins-Helm repository.'
+        )
+        string(
+            name: 'CHANGE_REQUEST_NUMBER', 
+            defaultValue: '', 
+            description: 'Change request number is required for deploying to cs1-prod and cs1-dev.'
+        )
+    }
+    stages {
+        stage('Validating Inputs') {
+            steps {
+                script {
+                    // On the first run of the pipeline, the parameters are defined but not set. 
+                    // This will detect if the paramaters have not been set and will prompt the user to restart the pipeline.
+                    try {
+                        if (DEPLOY_ENV == 'Select Environment') {
+                            error("You must select a DEPLOY_ENV to deploy to.")
+                        }
+                    } catch (groovy.lang.MissingPropertyException e) {
+                        error("This is the first run of the job. Please run the job again to select the deployment environment.")
+                    }
+
+                    // Determine the environment based on DEPLOY_ENV
+                    def envPrefix = params.DEPLOY_ENV.contains('cs1') ? 'cs1' : 'cs2'
+                    
+                    // Get API links for specific openshift environments. E.g. `cs2-dev` will retrieve `api.cs2-dev.nz.service.test:6443`
+                    env.DEV_OCP_CLUSTER_API = globals.get("openshift.${envPrefix}-dev").get('api', 'api not found')
+                    env.PROD_OCP_CLUSTER_API = globals.get("openshift.${envPrefix}-prod").get('api', 'api not found')
+
+                    // Set the deploy namespace based on the deployment environment
+                    env.DEPLOY_NAMESPACE = params.DEPLOY_ENV.contains('prod') ? 'nzdd-jenkins-prod' : 'nzdd-jenkins-dev'
+
+                    // Validate Change Request Number if deploying to cs1-dev or cs1-prod
+                    String changeRequestNumber = params.CHANGE_REQUEST_NUMBER.trim()
+                    if (params.DEPLOY_ENV in ['cs1-dev', 'cs1-prod']) {
+                        if (!changeRequestNumber) {
+                            error("Please provide a Change Request Number when deploying to cs1-dev or cs1-prod.")
+                        } else if (changeRequestNumber.length() != 10) {
+                            error("The provided Change Request number is invalid. It should be exactly 10 characters long, but the provided number is ${CHANGE_REQUEST_NUMBER.length()} characters long.")
+                        } else if (!changeRequestNumber.startsWith("CHG")) {
+                            error("The provided Change Request number is invalid. It should begin with CHG.")
+                        } else if (!changeRequestNumber[-7..-1].matches("\\d{7}")) {
+                            error("The provided Change Request number is invalid. The last 7 characters need to be digits.")
+                        }
+                    }
+
+                    echo "Input validation passed, starting deployment of '${DEPLOY_ENV}' to '${DEPLOY_NAMESPACE}'."
+                }
+            }
+        }
+        stage('Checking Prerequistes') {
+            steps {
+                script {
+                    sh '''
+                        # Login is necessary as the deployment script relies on the existence of `~/.kube/config`, which is created upon successful login.
+                        oc login --server=https://$DEV_OCP_CLUSTER_API --username="$OCP_CREDS_DEV_USR" --password="$OCP_CREDS_DEV_PSW"
+
+                        ./sites/nzdd-deployments/files/check_rolebinding.sh nzdd-jenkins-dev nzddjenkinsdsa admin
+                        ./sites/nzdd-deployments/files/check_rolebinding.sh digital-image-builds nzddjenkinsdsa-edit edit
+
+                        oc login --server=https://$PROD_OCP_CLUSTER_API --username="$OCP_CREDS_PROD_USR" --password="$OCP_CREDS_PROD_PSW"
+                        ./sites/nzdd-deployments/files/check_rolebinding.sh nzdd-jenkins-prod nzddjenkinsdsa admin
+                    '''
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                script {
+                    ansiColor('xterm') {
+                        sh '''
+                            # Login is necessary as the deployment script relies on the existence of `~/.kube/config`, which is created upon successful login.
+                            oc login --server=https://$PROD_OCP_CLUSTER_API --username="$OCP_CREDS_PROD_USR" --password="$OCP_CREDS_PROD_PSW"
+                            oc login --server=https://$DEV_OCP_CLUSTER_API --username="$OCP_CREDS_DEV_USR" --password="$OCP_CREDS_DEV_PSW"
+
+                            git checkout "${DEPLOY_BRANCH_NAME}"
+                            yes | DEPLOY_ENV="$DEPLOY_ENV" ./sites/nzdd-deployments/run.sh deploy
+                        '''
+                    }
+                }
+            }
+        }
+    }
+}

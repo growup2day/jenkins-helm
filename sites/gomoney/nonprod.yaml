@@ -1,0 +1,16 @@
+persistentVolume:
+  storage: 349525336Ki # We are unsure how this number got here, but its easier to continue using it than to change it to something more sensible https://jira.nz.service.anz/browse/PAP-2031
+
+resources:
+  limits:
+    memory: 8Gi
+
+jobsBackupRepository: "https://bitbucket.nz.service.anz/scm/GOM/jenkinsjobs-non-production.git"
+jobsBackupRepositoryBranch: "master"
+  
+JCasC:
+  openshiftClouds:
+    openshift_non_prod:
+      namespace: "{{ .Release.Namespace }}"
+      skipTlsVerify: false
+      webSocket: true

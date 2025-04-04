@@ -1,0 +1,9 @@
+JCasC:
+  openshiftClouds:
+    prod:
+      serverUrl: "https://api.cs1.nz.service.anz:6443"
+      credentialsId: "cs1-prod-openshift"
+
+  permanentNodes:
+    commonAttributes:
+      remoteFS: "D:\\OPALWorkspaceCS1"

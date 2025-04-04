@@ -1,0 +1,138 @@
+podAnnotations:
+  # For Dynatrace
+  environment: P
+
+persistentVolume:
+  storage: 200Gi
+
+JCasC:
+  # Set to configure SlackNotifier plugin
+  slackNotifier:
+    credentialId: IBSlackIntegration
+
+  permanentNodes:
+    enabled: true
+    commonAttributes:
+      nodeProperties:
+        - toolLocation:
+            locations:
+              - home: "/usr/lib/jvm/java-1.8.0"
+                key: "hudson.model.JDK$DescriptorImpl@JDK 1.8"
+      remoteFS: "/app/jenkins"
+
+  openshiftClouds:
+    prod:
+      serverUrl: "" # to be set by prod-cs1.yaml and prod-cs2.yaml
+      namespace: "{{ .Release.Namespace }}"
+      webSocket: true
+      defaultsProviderTemplate: "default-jenkins-slave"
+      simpleTemplates:
+        commonPodAttributes:
+          volumes:
+            - persistentVolumeClaim:
+                claimName: '{{ include "jenkins.fullname" . }}-git-reference'
+                mountPath: "/var/lib/jenkins/gitref"
+                readOnly: false
+        templates:
+          default-jenkins-slave:
+            label: "prod"
+            image:
+              registry: "docker-digital-image-builds-local.artifactory.nz.service.anz"
+              path: "jenkins-slave-maven-nodejs-chrome/jenkins-slave-maven-nodejs-chrome:java17-maven396-nodejs16-chrome114"
+            useGoInit: true
+            idleMinutes: ""
+            envVars:
+              kubernetes_backend: "{{ $.Values.JCasC.vault.mountPath }}"
+          master-jenkins-slave:
+            # slave to run for the `node('master')` part of the pipeline - instead of running in the Jenkins master node
+            label: "master python oc jq skopeo"
+            image:
+              registry: "docker-ose-platform-local.artifactory-staging.nz.service.anz"
+              path: "jenkins-ocp-anz/ose-jenkins-agent-maven:20230623"
+            useGoInit: true
+            podAttributes:
+              idleMinutes: 60
+              instanceCap: 5
+              nodeUsageMode: EXCLUSIVE
+    # explicit cloud definition for the 2 prod clusters
+    cs1-prod:
+      serverUrl: "https://api.cs1.nz.service.anz:6443"
+      namespace: "{{ .Release.Namespace }}"
+      credentialsId: "cs1-prod-openshift"
+      webSocket: true
+      defaultsProviderTemplate: "default-jenkins-slave"
+      simpleTemplates:
+        templates:
+          default-jenkins-slave:
+            label: "cs1-prod"
+            image:
+              registry: "docker-ose-platform-local.artifactory-staging.nz.service.anz"
+              path: "jenkins-ocp-anz/ose-jenkins-agent-maven:20230623"
+            useGoInit: true
+            idleMinutes: ""
+            envVars:
+              kubernetes_backend: "kubernetes-cs1"
+    cs2-prod:
+      serverUrl: "https://api.cs2.nz.service.anz:6443"
+      namespace: "{{ .Release.Namespace }}"
+      credentialsId: "cs2-prod-openshift"
+      webSocket: true
+      defaultsProviderTemplate: "default-jenkins-slave"
+      simpleTemplates:
+        templates:
+          default-jenkins-slave:
+            label: "cs2-prod"
+            image:
+              registry: "docker-ose-platform-local.artifactory-staging.nz.service.anz"
+              path: "jenkins-ocp-anz/ose-jenkins-agent-maven:20230623"
+            useGoInit: true
+            idleMinutes: ""
+            envVars:
+              kubernetes_backend: "kubernetes-cs2"
+
+  configScripts:
+    multi-branch-jobs: |
+      jobs:
+        - script: |
+            {{- .Files.Get "groovy-lib/multibranch-pipeline-helper.groovy" | nindent 6 }}
+
+            def buildBranchRegex = 'master'
+            {{- tpl $.Values.ibJobsSnippet $ | nindent 6 }}
+            {{- tpl $.Values.ibatOpenshiftJobsSnippet $ | nindent 6 }}
+            {{- tpl $.Values.ibBatchJobsSnippet $ | nindent 6 }}
+            {{- tpl $.Values.samJobsSnippet $ | nindent 6 }}
+            {{- tpl $.Values.preauthOcpv4JobsSnippet $ | nindent 6 }}
+            {{- tpl $.Values.IBSyntheticMonitorJobsSnippet $ | nindent 6 }}
+            {{- tpl $.Values.ibImageCacheJobSnippet $ | nindent 6 }}
+            {{- tpl $.Values.ibAcceptanceTestJobSnippet $ | nindent 6 }}
+            {{- tpl $.Values.ibMockServicesJobSnippet $ | nindent 6 }}
+
+    pipeline-jobs: |
+      jobs:
+        - script: |
+            {{- .Files.Get "groovy-lib/pipeline-helper.groovy" | nindent 6 }}
+            bitbucketPipelineJob(
+              jobName: "Blue-Deploy-to-Acceptance-and-Union",
+              gitUrl: "https://bitbucket.nz.service.anz/scm/ib/internetbanking.git",
+              credentialsId: "Bitbucket_ServiceAccount",
+              branch: "master",
+              scriptPath: 'JenkinsBlueDeployFile',
+              shallowCloneDepth: 1,
+              triggerBuildOnPush: false,
+              pollSCMSpec: null,
+            )
+            bitbucketPipelineJob(
+              jobName: "ib-nightly-regression",
+              displayName: "IB Nightly Regression",
+              description: "Nightly Regression run of IB test suite",
+              gitUrl: "https://bitbucket.nz.service.anz/scm/ib/ib-acceptance.git",
+              credentialsId: "Bitbucket_ServiceAccount",
+              branch: "master",
+              scriptPath: 'Jenkinsfile-Nightly',
+              shallowCloneDepth: 1,
+              triggerBuildOnPush: false,
+              pollSCMSpec: null,
+              cronSpec: "H H(19-20) * * *",
+              buildRetentionDaysStr: "7",
+              buildRetentionNumStr: "20",
+            )

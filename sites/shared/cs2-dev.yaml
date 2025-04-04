@@ -1,0 +1,6 @@
+domain: apps.cs2-dev.nz.service.test
+
+JCasC:
+  vault:
+    namespace: nonprod
+    mountPath: kubernetes-cs2

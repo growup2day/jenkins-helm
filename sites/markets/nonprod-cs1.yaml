@@ -1,0 +1,12 @@
+JCasC:
+  openshiftClouds:
+    dev:
+      serverUrl: "https://api.cs1-dev.nz.service.test:6443"
+      credentialsId: "cs1-dev-openshift"
+
+  permanentNodes:
+    agents:
+      nz31rmpa001v:
+        nodeDescription: "Building Java 11 apps on RHEL8 nz31rmpa001v"
+        remoteFS: "/app/jenkins/cs1-jenkins-agent"
+        labelString: "jenkins-java11-build-env"

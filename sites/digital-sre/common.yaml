@@ -1,0 +1,188 @@
+customiseRoleMapping:
+  enabled: true
+  mappings:
+    # customise role mapping to grant user with 'view' role the ability to run and cancel jobs
+    Job-Build: view,edit,admin
+    Job-Cancel: view,edit,admin
+
+podAnnotations:
+  support_wiki: "https://confluence.nz.service.anz/x/47eqKw"
+  alert_group: "NZ_TSM_RA_DIGITAL"
+  server_role: "openshift_worker_node"
+  cost_centre: "89251495"
+  alerting_criticality: "low"
+  dev_contact: "NZInternetBankingSupport@anz.com"
+  support_contact: "NZInternetBankingSupport@anz.com"
+  Management_zone: "Omni-Digital"
+
+jenkinsSlaveImage:
+  registry: "docker-digital-image-builds-local.artifactory.nz.service.anz"
+  path: "jenkins-slave-ansible/jenkins-slave-ansible-1"
+  tag: "latest"
+
+JCasC:
+  defaultConfig: true
+
+  adminAddress: "NZ Internet Banking Support <nzinternetbankingsupport@anz.com>"
+
+  master:
+    mode: NORMAL
+    numExecutors: 5
+    proxy:
+      name: "10.38.141.33"
+      port: 80
+      noProxyHost: |-
+        *.service.dev
+        *.test
+        *.anz
+        *.anznb.co.nz
+
+  quietDown:
+    enableScript: true
+
+  anzBitbucket:
+    enabled: true
+    manageHooks: false
+    credentialsId: bitBucketUsernamePasswordCredentials
+
+  pipelineLibraries:
+    openshiftPipeline:
+      repo: https://bitbucket.nz.service.anz/scm/pipe/openshift-pipeline.git
+      credentialsId: bitBucketUsernamePasswordCredentials
+      includeInChangesets: true
+    ado-utils:
+      repo: ssh://bitbucket.nz.service.anz:7998/ado/jenkins-utils.git
+      credentialsId: bitBucketUsernamePasswordCredentials
+
+  openshiftSync:
+    enabled: false
+
+  envVars:
+    ARTIFACTORY_REPOSITORY_BASE_URL: https://artifactory.nz.service.anz/artifactory
+    DIGS_REF_REPO_PATH: /var/lib/jenkins/gitref/jenkins-jobs
+
+  vault: # https://javadoc.jenkins.io/plugin/hashicorp-vault-plugin/com/datapipe/jenkins/vault/credentials/common/package-summary.html
+    credentials:
+      # Service account: nzdigitalsrecicdsa
+      bitBucketUsernamePasswordCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Service account for BitBucket access"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/bitbucket'
+        scope: GLOBAL
+        usernameKey: "username"
+        passwordKey: "password"
+      artifactoryUsernameApiKeyCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Username and API Key for Artifactory"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/artifactory'
+        scope: GLOBAL
+        usernameKey: "artifactory_username"
+        passwordKey: "artifactory_api_key"
+      artifactoryStagingUsernameApiKeyCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Username and API Key for Staging Artifactory"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/artifactory'
+        scope: GLOBAL
+        usernameKey: "staging_artifactory_username"
+        passwordKey: "staging_artifactory_api_key"
+      test-secret:
+        kind: vaultStringCredentialImpl
+        description: "Secret for testing"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/test'
+        scope: GLOBAL
+        vaultKey: "TestKey"
+
+      # SSH keys
+      ACCPT1_JUMPHOST_SERVER_SSH_KEY:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: Credentials login into ACCPT1 Jumphost.
+        path: secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/pairs/ACCPT1_JUMPHOST_SERVER_SSH_KEY
+        scope: GLOBAL
+      UNION1_JUMPHOST_SERVER_SSH_KEY:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: Credentials login into UNION1 Jumphost.
+        path: secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/pairs/UNION1_JUMPHOST_SERVER_SSH_KEY
+        scope: GLOBAL
+      REHEARSAL1_JUMPHOST_SERVER_SSH_KEY:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: Credentials login into REHEARSAL1 Jumphost.
+        path: secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/pairs/REHEARSAL1_JUMPHOST_SERVER_SSH_KEY
+        scope: GLOBAL    
+
+      # IB SSH Keys            
+      ACCPT1_IB_SERVER_SSH_KEY:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: Credentials login into ACCPT1 WebSphere environment.
+        path: secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/pairs/ACCPT1_IB_SERVER_SSH_KEY
+        scope: GLOBAL
+      UNION1_IB_SERVER_SSH_KEY:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: Credentials login into UNION1 WebSphere environment.
+        path: secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/pairs/UNION1_IB_SERVER_SSH_KEY
+        scope: GLOBAL
+      REHEARSAL1_IB_SERVER_SSH_KEY:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: Credentials login into REHEARSAL1 WebSphere environment.
+        path: secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/pairs/REHEARSAL1_IB_SERVER_SSH_KEY
+        scope: GLOBAL  
+
+      # CSP SSH Keys
+      ACCPT1_CSP_SERVER_SSH_KEY:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: Credentials login into ACCPT1 WebSphere environment.
+        path: secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/pairs/ACCPT1_CSP_SERVER_SSH_KEY
+        scope: GLOBAL
+      UNION1_CSP_SERVER_SSH_KEY:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: Credentials login into UNION1 WebSphere environment.
+        path: secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/pairs/UNION1_CSP_SERVER_SSH_KEY
+        scope: GLOBAL
+      REHEARSAL1_CSP_SERVER_SSH_KEY:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: Credentials login into REHEARSAL1 WebSphere environment.
+        path: secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/pairs/REHEARSAL1_CSP_SERVER_SSH_KEY
+        scope: GLOBAL
+
+      # Traffic Management
+      nzdigitalsredsa:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Credentials for vDirect traffic management."
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/vdirect'
+        scope: GLOBAL      
+
+  openshiftClouds:
+    dev:
+      serverUrl: "" # to be set by individual variants
+      namespace: "{{ .Release.Namespace }}"
+      webSocket: true
+      defaultsProviderTemplate: "default-jenkins-slave"
+      simpleTemplates:
+        commonPodAttributes:
+          idleMinutes: 10
+          instanceCap: 8
+          yamlMergeStrategy: "override"
+        commonEnvVars:
+          TZ: "Pacific/Auckland"
+          http_proxy: ""
+          https_proxy: ""
+          CONCURRENT_BUILD_TASKS: "2"
+        templates:
+          default-jenkins-slave:
+            label: "openshift"
+            image:
+              registry: ""
+            useGoInit: true
+            idleMinutes: ""
+            envVars:
+              kubernetes_backend: "{{ $.Values.JCasC.vault.mountPath }}"
+              
+  configScripts:
+    content-security-policy: |
+      groovy:
+        - script: |
+            System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "default-src 'self'; img-src 'self' data:; font-src 'self' data:;")
+    anonymous-access: |
+      groovy:
+         - script: |
+            {{- .Files.Get "groovy-lib/anonymous-access-helper.groovy" | nindent 6 }}
+            setAnonymousAccess(["Overall-Read", "Job-Discover"] as String[])            

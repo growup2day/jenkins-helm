@@ -1,0 +1,29 @@
+# this file defines Jenkins plugins that are required by CSP that are not defined in the base Jenkins image
+# See https://confluence.nz.service.anz/x/VxXTAg
+# Required by openshift-pipeline
+ansicolor:0.6.3
+artifactory:3.13.1
+htmlpublisher:1.14
+lockable-resources:2.8
+openshift-client:1.0.35
+slack:2.40
+timestamper:1.11.3
+pipeline-utility-steps:2.11.0
+
+# integration with NZ Vault
+hashicorp-vault-plugin:3.8.0
+
+# Copied from CSP Jenkins
+checkstyle:4.0.0
+generic-webhook-trigger:1.67
+ansible:1.0
+performance:3.17
+rebuild:1.31
+performance-signature-dynatracesaas:3.1.5
+
+# Copied from jenkins-cd-ansible
+git:4.7.1
+git-client:3.7.1
+bitbucket:1.1.27
+cloudbees-bitbucket-branch-source:2.9.8
+

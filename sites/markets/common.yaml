@@ -1,0 +1,646 @@
+customiseRoleMapping:
+  enabled: true
+  mappings:
+    # customise role mapping to grant user with 'view' role the ability to run and cancel jobs
+    Job-Build: view,edit,admin
+    Job-Cancel: view,edit,admin
+
+podAnnotations:
+  support_wiki: "https://confluence.nz.service.anz/x/sDGmPQ"
+  alert_group: "NZ_TSM_WS_Markets_Support"
+  server_role: "openshift_worker_node"
+  cost_centre: "85005759"
+  alerting_criticality: "low"
+  dev_contact: "_nzapplicationsupport-nzmarkets_@anz.com"
+  support_contact: "_nzapplicationsupport-nzmarkets_@anz.com"
+  Management_zone: "Payments"
+
+persistentVolume:
+  storage: 50Gi
+
+JCasC:
+  defaultConfig: true
+  adminAddress: "NZ Application Support-NZmarkets <_nzapplicationsupport-nzmarkets_@anz.com>"
+
+  master:
+    mode: NORMAL
+    numExecutors: 2
+    proxy:
+      name: "10.38.141.33"
+      port: 80
+      noProxyHost: |-
+        *.service.dev
+        *.test
+        *.anz
+        *.anznb.co.nz
+
+  quietDown:
+    enableScript: true
+
+  anzBitbucket:
+    enabled: true
+    manageHooks: false
+    credentialsId: bitbucket
+
+  openshiftSync:
+    enabled: true
+
+  vault:
+    enabled: true
+
+  openshiftClouds:
+    # explicit cloud definition for the 2 non-prod clusters
+    openshift_cs1_dev:
+      serverUrl: "https://api.cs1-dev.nz.service.test:6443"
+      namespace: "{{ .Release.Namespace }}"
+      credentialsId: "cs1-dev-openshift"
+      skipTlsVerify: false
+      webSocket: true
+      # default slave for cs1
+      defaultsProviderTemplate: "maven-cs1"
+      simpleTemplates:
+        commonPodAttributes:
+          idleMinutes: 10
+          instanceCap: 8
+          yamlMergeStrategy: "override"
+        commonContainerAttributes:
+          resourceRequestCpu: "200m"
+          resourceRequestMemory: "500Mi"
+          resourceLimitCpu: "4"
+          resourceLimitMemory: "10Gi"
+        commonEnvVars:
+          TZ: "Pacific/Auckland"
+          http_proxy: ""
+          https_proxy: ""
+        templates:
+          maven:
+            label: "maven-cs1"
+            image:
+              registry: "docker-ose-platform-local.artifactory-staging.nz.service.anz"
+              path: "jenkins-ocp-anz/ose-jenkins-agent-maven:20230703a"
+            useGoInit: true
+            idleMinutes: ""
+            containerAttributes:
+              resourceLimitCpu: "2"
+              resourceLimitMemory: "1Gi"
+            envVars:
+              # The environment variable of the default template would be inherited for all other pod templates
+              # whether they are defined below, or with podTemplate in the pipeline
+
+              # The kubernetes_backend environment variable would be consumed by vault-helper-functions.sh in the
+              # openshift-pipeline. See:
+              # https://bitbucket.nz.service.anz/projects/PIPE/repos/openshift-pipeline/browse/resources/vault-helper-functions.sh#61-64,86
+              # It can also be used by any other code that require loading secrets from Vault
+              kubernetes_backend: "kubernetes-cs1"
+              app_domain: apps.cs1-dev.nz.service.test
+          maven21:
+            label: "maven21-cs1"
+            image:
+              registry: "docker-digital-image-builds-local.artifactory.nz.service.anz"
+              path: "java21-maven-agent/java21-maven-agent:latest"
+            useGoInit: true
+            idleMinutes: ""
+            containerAttributes:
+              resourceLimitCpu: "2"
+              resourceLimitMemory: "1Gi"
+            envVars:
+              # The environment variable of the default template would be inherited for all other pod templates
+              # whether they are defined below, or with podTemplate in the pipeline
+
+              # The kubernetes_backend environment variable would be consumed by vault-helper-functions.sh in the
+              # openshift-pipeline. See:
+              # https://bitbucket.nz.service.anz/projects/PIPE/repos/openshift-pipeline/browse/resources/vault-helper-functions.sh#61-64,86
+              # It can also be used by any other code that require loading secrets from Vault
+              kubernetes_backend: "kubernetes-cs1"
+              app_domain: apps.cs1-dev.nz.service.test
+    openshift_cs2_dev:
+      serverUrl: "https://api.cs2-dev.nz.service.test:6443"
+      namespace: "{{ .Release.Namespace }}"
+      credentialsId: "cs2-dev-openshift"
+      skipTlsVerify: false
+      webSocket: true
+      # default slave for cs2
+      defaultsProviderTemplate: "maven-cs2"
+      simpleTemplates:
+        commonPodAttributes:
+          idleMinutes: 10
+          instanceCap: 8
+          yamlMergeStrategy: "override"
+        commonContainerAttributes:
+          resourceRequestCpu: "200m"
+          resourceRequestMemory: "500Mi"
+          resourceLimitCpu: "4"
+          resourceLimitMemory: "10Gi"
+        commonEnvVars:
+          TZ: "Pacific/Auckland"
+          http_proxy: ""
+          https_proxy: ""
+        templates:
+          maven:
+            label: "maven-cs2"
+            image:
+              registry: "docker-ose-platform-local.artifactory-staging.nz.service.anz"
+              path: "jenkins-ocp-anz/ose-jenkins-agent-maven:20230703a"
+            useGoInit: true
+            idleMinutes: ""
+            containerAttributes:
+              resourceLimitCpu: "2"
+              resourceLimitMemory: "1Gi"
+            envVars:
+              # The environment variable of the default template would be inherited for all other pod templates
+              # whether they are defined below, or with podTemplate in the pipeline
+
+              # The kubernetes_backend environment variable would be consumed by vault-helper-functions.sh in the
+              # openshift-pipeline. See:
+              # https://bitbucket.nz.service.anz/projects/PIPE/repos/openshift-pipeline/browse/resources/vault-helper-functions.sh#61-64,86
+              # It can also be used by any other code that require loading secrets from Vault
+              kubernetes_backend: "kubernetes-cs2"
+              app_domain: apps.cs2-dev.nz.service.test
+          maven21:
+            label: "maven21-cs2"
+            image:
+              registry: "docker-digital-image-builds-local.artifactory.nz.service.anz"
+              path: "java21-maven-agent/java21-maven-agent:latest"
+            useGoInit: true
+            idleMinutes: ""
+            containerAttributes:
+              resourceLimitCpu: "2"
+              resourceLimitMemory: "1Gi"
+            envVars:
+              # The environment variable of the default template would be inherited for all other pod templates
+              # whether they are defined below, or with podTemplate in the pipeline
+
+              # The kubernetes_backend environment variable would be consumed by vault-helper-functions.sh in the
+              # openshift-pipeline. See:
+              # https://bitbucket.nz.service.anz/projects/PIPE/repos/openshift-pipeline/browse/resources/vault-helper-functions.sh#61-64,86
+              # It can also be used by any other code that require loading secrets from Vault
+              kubernetes_backend: "kubernetes-cs2"
+              app_domain: apps.cs2-dev.nz.service.test
+    # The "dev" cluster would be on the same "side" as the Jenkins master, mainly used to run slaves
+    dev:
+      serverUrl: "" # to be set by individual variants
+      namespace: "{{ .Release.Namespace }}"
+      webSocket: true
+      defaultsProviderTemplate: "maven"
+      simpleTemplates:
+        commonPodAttributes:
+          idleMinutes: 10
+          instanceCap: 8
+          yamlMergeStrategy: "override"
+        commonContainerAttributes:
+          resourceRequestCpu: "200m"
+          resourceRequestMemory: "1Gi"
+          resourceLimitCpu: "4"
+          resourceLimitMemory: "10Gi"
+        commonEnvVars:
+          TZ: "Pacific/Auckland"
+          http_proxy: ""
+          https_proxy: ""
+        templates:
+          maven:
+            label: "maven"
+            image:
+              registry: "docker-ose-platform-local.artifactory-staging.nz.service.anz"
+              path: "jenkins-ocp-anz/ose-jenkins-agent-maven:20230703a"
+            useGoInit: true
+            idleMinutes: ""
+            containerAttributes:
+              resourceLimitCpu: "2"
+              resourceLimitMemory: "2Gi"
+            envVars:
+              # The environment variable of the default template would be inherited for all other pod templates
+              # whether they are defined below, or with podTemplate in the pipeline
+
+              # The kubernetes_backend environment variable would be consumed by vault-helper-functions.sh in the
+              # openshift-pipeline. See:
+              # https://bitbucket.nz.service.anz/projects/PIPE/repos/openshift-pipeline/browse/resources/vault-helper-functions.sh#61-64,86
+              # It can also be used by any other code that require loading secrets from Vault
+              kubernetes_backend: "{{ $.Values.JCasC.vault.mountPath }}"
+              app_domain: "{{ $.Values.domain }}"
+          maven8:
+            label: "maven8"
+            image:
+              registry: "image-registry.openshift-image-registry.svc:5000"
+              path: "mkts-tools/jenkins-agent-maven-java-1.8:latest"
+            useGoInit: true
+            idleMinutes: ""
+            containerAttributes:
+              resourceLimitCpu: "2"
+              resourceLimitMemory: "1Gi"
+            envVars:
+              # The environment variable of the default template would be inherited for all other pod templates
+              # whether they are defined below, or with podTemplate in the pipeline
+
+              # The kubernetes_backend environment variable would be consumed by vault-helper-functions.sh in the
+              # openshift-pipeline. See:
+              # https://bitbucket.nz.service.anz/projects/PIPE/repos/openshift-pipeline/browse/resources/vault-helper-functions.sh#61-64,86
+              # It can also be used by any other code that require loading secrets from Vault
+              kubernetes_backend: "{{ $.Values.JCasC.vault.mountPath }}"
+              app_domain: "{{ $.Values.domain }}"
+          maven17:
+            label: "maven17"
+            image:
+              registry: "docker-digital-image-builds-local.artifactory.nz.service.anz"
+              path: "java17-maven-agent/java17-maven-agent:latest"
+            useGoInit: true
+            idleMinutes: ""
+            containerAttributes:
+              resourceLimitCpu: "2"
+              resourceLimitMemory: "2Gi"
+            envVars:
+              # The environment variable of the default template would be inherited for all other pod templates
+              # whether they are defined below, or with podTemplate in the pipeline
+
+              # The kubernetes_backend environment variable would be consumed by vault-helper-functions.sh in the
+              # openshift-pipeline. See:
+              # https://bitbucket.nz.service.anz/projects/PIPE/repos/openshift-pipeline/browse/resources/vault-helper-functions.sh#61-64,86
+              # It can also be used by any other code that require loading secrets from Vault
+              kubernetes_backend: "{{ $.Values.JCasC.vault.mountPath }}"
+              app_domain: "{{ $.Values.domain }}"
+          maven21:
+            label: "maven21"
+            image:
+              registry: "docker-digital-image-builds-local.artifactory.nz.service.anz"
+              path: "java21-maven-agent/java21-maven-agent:latest"
+            useGoInit: true
+            idleMinutes: ""
+            containerAttributes:
+              resourceLimitCpu: "2"
+              resourceLimitMemory: "2Gi"
+            envVars:
+              # The environment variable of the default template would be inherited for all other pod templates
+              # whether they are defined below, or with podTemplate in the pipeline
+
+              # The kubernetes_backend environment variable would be consumed by vault-helper-functions.sh in the
+              # openshift-pipeline. See:
+              # https://bitbucket.nz.service.anz/projects/PIPE/repos/openshift-pipeline/browse/resources/vault-helper-functions.sh#61-64,86
+              # It can also be used by any other code that require loading secrets from Vault
+              kubernetes_backend: "{{ $.Values.JCasC.vault.mountPath }}"
+              app_domain: "{{ $.Values.domain }}"
+
+MarketsSnippet: |
+  bitbucketOrganizationFolder(
+    folderName: "markets",
+    displayName: "Markets",
+    project: "MAR",
+    credentialsId: "bitbucket",
+    branchRegex: '.*',
+    repoRegex: 'fxeasy-deal-service|fold|fxeasy-test-harness|fxeasy-admin-ui|fxeasy-common|fxeasy-core|fxeasy-deal-ui|historical-rates|infrastructure-tomcat9-java11|fxeasy-quote-service|fxeasy-rates-service|fxeasy-rates-file-formatter|wssreuters|mantec-gui|fxeasy-services-parent',
+    branchDiscoveryStrategyId: 3,
+    pullRequestDiscoveryStrategyId: 1,
+    branchNamesToBuildAutomaticallyRegex: "",
+    excludePublicRepoPullRequest: false
+  )
+
+FoldAutomationRegressionTestsSnippet: |
+  bitbucketMultibranchPipelineJob(
+    jobName: "fold-automation-regression-tests",
+    displayName: "Fold Automation Regression Tests",
+    project: "MAR",
+    repo: "fold",
+    credentialsId: "bitbucket",
+    scriptPath: 'JenkinsJobs/AutomationRegressionTests/Jenkinsfile',
+    branchRegex: '.*',
+    discardOldItemsDays: -1,
+    discardOldItemsNum: 10,
+    noTriggerBranchProperty: true
+  )
+
+FoldReleaseSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fold-release",
+    displayName: "Fold Release",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fold.git',
+    credentialsId: 'bitbucket',
+    branch: 'develop',
+    scriptPath: 'JenkinsJobs/Release/Jenkinsfile',
+    triggerBuildOnPush: false,
+    pollSCMSpec: ''
+  )
+
+FXEasyAdminUIReleaseSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-admin-ui-release",
+    displayName: "FXEasy Admin UI Release",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fxeasy-admin-ui.git',
+    credentialsId: 'bitbucket',
+    branch: 'develop',
+    scriptPath: 'JenkinsJobs/Release/Jenkinsfile',
+    triggerBuildOnPush: false,
+    buildRetentionNumStr: '10',
+    pollSCMSpec: ''
+  )
+
+FXEasyDealUIReleaseSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-deal-ui-release",
+    displayName: "FXEasy Deal UI Release",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fxeasy-deal-ui.git',
+    credentialsId: 'bitbucket',
+    branch: 'develop',
+    scriptPath: 'JenkinsJobs/Release/Jenkinsfile',
+    triggerBuildOnPush: false,
+    buildRetentionNumStr: '10',
+    pollSCMSpec: ''
+  )
+
+FXEasyDealServiceReleaseSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-deal-service-release",
+    displayName: "FXEasy Deal Service Release",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fxeasy-deal-service.git',
+    credentialsId: 'bitbucket',
+    branch: 'develop',
+    scriptPath: 'JenkinsJobs/Release/Jenkinsfile',
+    triggerBuildOnPush: false,
+    buildRetentionNumStr: '20',
+    pollSCMSpec: ''
+  )
+
+FXEasyQuoteServiceReleaseSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-quote-service-release",
+    displayName: "FXEasy Quote Service Release",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fxeasy-quote-service.git',
+    credentialsId: 'bitbucket',
+    branch: 'develop',
+    scriptPath: 'JenkinsJobs/Release/Jenkinsfile',
+    triggerBuildOnPush: false,
+    buildRetentionNumStr: '20',
+    pollSCMSpec: ''
+  )
+
+FXEasyRatesServiceReleaseSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-rates-service-release",
+    displayName: "FXEasy Rates Service Release",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fxeasy-rates-service.git',
+    credentialsId: 'bitbucket',
+    branch: 'develop',
+    scriptPath: 'JenkinsJobs/Release/Jenkinsfile',
+    triggerBuildOnPush: false,
+    buildRetentionNumStr: '20',
+    pollSCMSpec: ''
+  )
+
+FXEasyCommonReleaseSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-common-release",
+    displayName: "FXEasy Common Release",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fxeasy-common.git',
+    credentialsId: 'bitbucket',
+    branch: 'develop',
+    scriptPath: 'JenkinsJobs/Release/Jenkinsfile',
+    triggerBuildOnPush: false,
+    buildRetentionNumStr: '20',
+    pollSCMSpec: ''
+  )
+
+HistoricalRatesReleaseSnippet: |
+  bitbucketPipelineJob(
+    jobName: "historical-rates-release",
+    displayName: "Historical Rates Release",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/historical-rates.git',
+    credentialsId: 'bitbucket',
+    branch: 'develop',
+    scriptPath: 'JenkinsJobs/Release/Jenkinsfile',
+    triggerBuildOnPush: false,
+    buildRetentionNumStr: '20',
+    pollSCMSpec: ''
+  )
+
+FXEasyOATPerformanceTestSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-oat-performance-test",
+    displayName: "FXEasy OAT Performace Test",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fxeasy-performance-tests.git',
+    credentialsId: 'bitbucket',
+    branch: 'master',
+    scriptPath: 'oat-performance-test/Jenkinsfile',
+    triggerBuildOnPush: false,
+    pollSCMSpec: ''
+  )
+
+FXEasyOATPerformanceTestWithGPPBurstsSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-oat-performance-test-with-gpp-bursts",
+    displayName: "FXEasy OAT Performace Test With GPP Bursts",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fxeasy-performance-tests.git',
+    credentialsId: 'bitbucket',
+    branch: 'master',
+    scriptPath: 'oat-performance-test-with-gpp-bursts/Jenkinsfile',
+    triggerBuildOnPush: false,
+    pollSCMSpec: ''
+  )
+
+FXEasyDealServiceAutomatedTestsSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-deal-service-automated-tests",
+    displayName: "FXEasy Deal Service Automated Tests",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fxeasy-deal-service-automated-test.git',
+    credentialsId: 'bitbucket',
+    branch: 'master',
+    pollSCMSpec: '',
+    parametersNeeded: true,
+    stringParams: [
+      [name: 'BRANCH', defaultValue: 'master', desc: 'The branch to checkout.'],
+      [name: 'TEST_SUITE', desc: 'Optional. Specifies the test suite to run. If not specified, the runner will execute all the test suites of your project.'],
+      [name: 'TEST_CASE', desc: 'Optional. Specifies the test case to run. If not specified, the runner will execute all the test cases of the specified test suite, or, if you have not specified a test suite, all the test cases of your project.'],
+      [name: 'TEST_SUITE_TAGS', desc: 'Optional. Specifies which tags must contain the test suite to be run. To create complex conditions, use the || (logical OR), && (logical AND) and ! (logical NOT) operators.'],
+      [name: 'TEST_CASE_TAGS', desc: 'Optional. Specifies which tags must contain the test case to be run. To create complex conditions, use the || (logical OR), && (logical AND) and ! (logical NOT) operators.'],
+      [name: 'ENVIRONMENT', desc: 'Optional. Specifies the environment configuration for the test run.']
+    ]
+  )
+
+FXEasyQuoteServiceAutomatedTestsSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-quote-service-automated-tests",
+    displayName: "FXEasy Quote Service Automated Tests",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fxeasy-quote-service-automated-test.git',
+    credentialsId: 'bitbucket',
+    branch: 'master',
+    pollSCMSpec: '',
+    parametersNeeded: true,
+    stringParams: [
+      [name: 'BRANCH', defaultValue: 'master', desc: 'The branch to checkout.'],
+      [name: 'TEST_SUITE', desc: 'Optional. Specifies the test suite to run. If not specified, the runner will execute all the test suites of your project.'],
+      [name: 'TEST_CASE', desc: 'Optional. Specifies the test case to run. If not specified, the runner will execute all the test cases of the specified test suite, or, if you have not specified a test suite, all the test cases of your project.'],
+      [name: 'TEST_TYPE', defaultValue: 'unit', desc: 'Optional. Specifies which kind of tests we want to run. E.g., unit, integration. To create complex conditions, use the || (logical OR), && (logical AND) and ! (logical NOT) operators.'],
+      [name: 'TEST_SUITE_TAGS', desc: 'Optional. Specifies which tags must contain the test suite to be run. To create complex conditions, use the || (logical OR), && (logical AND) and ! (logical NOT) operators.'],
+      [name: 'TEST_CASE_TAGS', desc: 'Optional. Specifies which tags must contain the test case to be run. To create complex conditions, use the || (logical OR), && (logical AND) and ! (logical NOT) operators.'],
+      [name: 'ENVIRONMENT', desc: 'Optional. Specifies the environment configuration for the test run.']
+    ]
+  )
+
+FXEasyRatesServiceAutomatedTestsSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-rates-service-automated-tests",
+    displayName: "FXEasy Rates Service Automated Tests",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fxeasy-rates-service-automated-test.git',
+    credentialsId: 'bitbucket',
+    branch: 'master',
+    pollSCMSpec: '',
+    parametersNeeded: true,
+    stringParams: [
+      [name: 'BRANCH', defaultValue: 'master', desc: 'The branch to checkout.'],
+      [name: 'TEST_SUITE', desc: 'Optional. Specifies the test suite to run. If not specified, the runner will execute all the test suites of your project.'],
+      [name: 'TEST_CASE', desc: 'Optional. Specifies the test case to run. If not specified, the runner will execute all the test cases of the specified test suite, or, if you have not specified a test suite, all the test cases of your project.'],
+      [name: 'TEST_SUITE_TAGS', desc: 'Optional. Specifies which tags must contain the test suite to be run. To create complex conditions, use the || (logical OR), && (logical AND) and ! (logical NOT) operators.'],
+      [name: 'TEST_CASE_TAGS', desc: 'Optional. Specifies which tags must contain the test case to be run. To create complex conditions, use the || (logical OR), && (logical AND) and ! (logical NOT) operators.'],
+      [name: 'ENVIRONMENT', desc: 'Optional. Specifies the environment configuration for the test run.']
+    ]
+  )
+
+# Prod jobs
+
+FXEasyDealServiceProductionDeploymentSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-deal-service-production-deployment",
+    displayName: "FXEasy Deal Service Production Deployment",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fxeasy-deal-service.git',
+    credentialsId: 'bitbucket',
+    branch: 'master',
+    scriptPath: 'JenkinsJobs/Production/Jenkinsfile',
+    triggerBuildOnPush: false,
+    buildRetentionNumStr: '10',
+    pollSCMSpec: '',
+    parametersNeeded: true,
+    stringParams: [[name: 'RELEASE_TAG', desc: 'Version tag to be deployed']]
+  )
+
+FXEasyQuoteServiceProductionDeploymentSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-quote-service-production-deployment",
+    displayName: "FXEasy Quote Service Production Deployment",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fxeasy-quote-service.git',
+    credentialsId: 'bitbucket',
+    branch: 'master',
+    scriptPath: 'JenkinsJobs/Production/Jenkinsfile',
+    triggerBuildOnPush: false,
+    buildRetentionNumStr: '10',
+    pollSCMSpec: '',
+    parametersNeeded: true,
+    stringParams: [[name: 'RELEASE_TAG', desc: 'Version tag to be deployed']]
+  )
+
+FXEasyRatesServiceProductionDeploymentSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-rates-service-production-deployment",
+    displayName: "FXEasy Rates Service Production Deployment",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fxeasy-rates-service.git',
+    credentialsId: 'bitbucket',
+    branch: 'master',
+    scriptPath: 'JenkinsJobs/Production/Jenkinsfile',
+    triggerBuildOnPush: false,
+    buildRetentionNumStr: '10',
+    pollSCMSpec: '',
+    parametersNeeded: true,
+    stringParams: [[name: 'RELEASE_TAG', desc: 'Version tag to be deployed']]
+  )
+
+FXEasyDealUIProductionDeploymentSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-deal-ui-production-deployment",
+    displayName: "FXEasy Deal UI Production Deployment",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fxeasy-deal-ui.git',
+    credentialsId: 'bitbucket',
+    branch: 'master',
+    scriptPath: 'JenkinsJobs/Production/Jenkinsfile',
+    triggerBuildOnPush: false,
+    buildRetentionNumStr: '10',
+    pollSCMSpec: '',
+    parametersNeeded: true,
+    stringParams: [[name: 'RELEASE_TAG', desc: 'Version tag to be deployed']]
+  )
+
+FXEasyAdminUIProductionDeploymentSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-admin-ui-production-deployment",
+    displayName: "FXEasy Admin UI Production Deployment",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fxeasy-admin-ui.git',
+    credentialsId: 'bitbucket',
+    branch: 'master',
+    scriptPath: 'JenkinsJobs/Production/Jenkinsfile',
+    triggerBuildOnPush: false,
+    buildRetentionNumStr: '10',
+    pollSCMSpec: '',
+    parametersNeeded: true,
+    stringParams: [[name: 'RELEASE_TAG', desc: 'Version tag to be deployed']]
+  )
+
+FXEasyCoreProductionDeploymentSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-core-production-deployment",
+    displayName: "FXEasy Core Production Deployment",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fxeasy-core.git',
+    credentialsId: 'bitbucket',
+    branch: 'dev-nz2',
+    scriptPath: 'JenkinsJobs/Production/Jenkinsfile',
+    triggerBuildOnPush: false,
+    buildRetentionNumStr: '10',
+    pollSCMSpec: '',
+    parametersNeeded: true,
+    stringParams: [[name: 'RELEASE_TAG', desc: 'Version tag to be deployed']]
+  )
+
+FXEasyHistoricalRatesProductionDeploymentSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fxeasy-historical-rates-production-deployment",
+    displayName: "FXEasy Historical Rates API Production Deployment",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/historical-rates.git',
+    credentialsId: 'bitbucket',
+    branch: 'master',
+    scriptPath: 'JenkinsJobs/Production/Jenkinsfile',
+    triggerBuildOnPush: false,
+    buildRetentionNumStr: '10',
+    pollSCMSpec: '',
+    parametersNeeded: true,
+    stringParams: [[name: 'RELEASE_TAG', desc: 'Version tag to be deployed']]
+  )
+
+FoldProductionDeploymentSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fold-production-deployment",
+    displayName: "Fold Production Deployment",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fold.git',
+    credentialsId: 'bitbucket',
+    branch: 'master',
+    scriptPath: 'JenkinsJobs/Production/Jenkinsfile',
+    triggerBuildOnPush: false,
+    buildRetentionNumStr: '10',
+    pollSCMSpec: '',
+    parametersNeeded: true,
+    stringParams: [[name: 'RELEASE_TAG', desc: 'Version tag to be deployed']]
+  )
+
+FoldEOMReportSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fold-eom-report",
+    displayName: "Fold EOM Report",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fold-reporting.git',
+    credentialsId: 'bitbucket',
+    branch: 'master',
+    scriptPath: 'JenkinsJobs/EOM/Jenkinsfile',
+    triggerBuildOnPush: false,
+    buildRetentionNumStr: '3',
+    cronSpec: '0 7 1 * *',
+    pollSCMSpec: '',
+    parametersNeeded: true,
+    booleanParams: [[name: 'SEND_FOLD_EOM_REPORT', defaultValue: true, desc: 'Option to send the report via email to Market Ops. (Note: this will only work in production due to email server whitelisting)']]
+  )
+
+FoldTDReportSnippet: |
+  bitbucketPipelineJob(
+    jobName: "fold-td-report",
+    displayName: "Fold TDs Created Today Report",
+    gitUrl: 'https://bitbucket.nz.service.anz/scm/mar/fold-reporting.git',
+    credentialsId: 'bitbucket',
+    branch: 'master',
+    scriptPath: 'JenkinsJobs/TDs_Created_Today/Jenkinsfile',
+    triggerBuildOnPush: false,
+    buildRetentionNumStr: '3',
+    cronSpec: '00 17 * * 1-5',
+    pollSCMSpec: '',
+    parametersNeeded: true,
+    booleanParams: [[name: 'SEND_FOLD_TD_REPORT', defaultValue: true, desc: 'Option to send the report via email to Market Ops. (Note: this will only work in production due to email server whitelisting)']]
+  )

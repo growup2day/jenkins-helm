@@ -1,0 +1,16 @@
+should include blank script approval config in default config scripts when not configured:
+  1: |
+    |-
+      security:
+        # In-process Script Approval
+        scriptApproval:
+          approvedSignatures: []
+should include script approval config in default config scripts when configured:
+  1: |
+    |-
+      security:
+        # In-process Script Approval
+        scriptApproval:
+          approvedSignatures:
+              - "method groovy.json.JsonSlurperClassic parseText java.lang.String"
+              - "new groovy.json.JsonSlurperClassic"

@@ -1,0 +1,9 @@
+JCasC:
+  openshiftClouds:
+    openshift_non_prod:
+      serverUrl: "https://api.cs1-dev.nz.service.test:6443"
+      credentialsId: "cs1-dev-openshift"
+
+  permanentNodes:
+    commonAttributes:
+      remoteFS: "C:\\AgentWorkspaceCluster1"

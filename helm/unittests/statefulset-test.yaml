@@ -1,0 +1,10 @@
+templates:
+  - statefulset.yaml
+tests:
+  - it: default pod spec should match snapshot
+    set:
+      image:
+        tag: v4.7.2
+    asserts:
+      - matchSnapshot:
+          path: spec.template.spec

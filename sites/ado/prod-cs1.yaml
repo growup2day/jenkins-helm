@@ -1,0 +1,6 @@
+# The config that is specific to the prod CS1 cluster
+JCasC:
+  # Slave home directory config
+  permanentNodes:
+    commonAttributes:
+      remoteFS: "/app/jenkins/openshift-prod-cs1-home"

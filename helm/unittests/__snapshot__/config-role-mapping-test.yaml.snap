@@ -1,0 +1,48 @@
+when enabled, content should match snapshot:
+  1: |
+    apiVersion: v1
+    data:
+      Agent-Build: admin
+      Agent-Configure: admin
+      Agent-Connect: admin
+      Agent-Create: admin
+      Agent-Delete: admin
+      Agent-Disconnect: admin
+      Artifactory-Promote: admin
+      Artifactory-Release: admin
+      Credentials-Create: admin
+      Credentials-Delete: admin
+      Credentials-ManageDomains: admin
+      Credentials-Update: admin
+      Credentials-View: view,edit,admin
+      Job-Build: edit,admin
+      Job-Cancel: edit,admin
+      Job-Configure: edit,admin
+      Job-Create: edit,admin
+      Job-Delete: edit,admin
+      Job-Discover: view,edit,admin
+      Job-Move: admin
+      Job-Read: view,edit,admin
+      Job-Workspace: edit,admin
+      Metrics-HealthCheck: admin
+      Metrics-ThreadDump: admin
+      Metrics-View: admin
+      Overall-Administer: admin
+      Overall-Read: view,edit,admin
+      Run-Delete: admin
+      Run-Replay: admin
+      Run-Update: admin
+      SCM-Tag: edit,admin
+      View-Configure: admin
+      View-Create: admin
+      View-Delete: admin
+      View-Read: admin
+    kind: ConfigMap
+    metadata:
+      labels:
+        app: RELEASE-NAME-jenkins
+        app.kubernetes.io/managed-by: Helm
+        helm.sh/chart: jenkins-0.7.0
+        name: RELEASE-NAME-jenkins
+        release-name: RELEASE-NAME
+      name: openshift-jenkins-login-plugin-config

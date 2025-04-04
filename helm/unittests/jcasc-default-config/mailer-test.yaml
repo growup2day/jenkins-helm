@@ -1,0 +1,37 @@
+templates:
+  - config-jcasc.yaml
+tests:
+  - it: should include mailer config in default config scripts when configured
+    set:
+      JCasC:
+        defaultConfig: true
+        mailer:
+          smtpHost: "smtp.anznp.co.nz"
+    asserts:
+      - isNotNull:
+          path: data.[jcasc-default-config-mailer.yaml]
+      - matchSnapshot:
+          path: data.[jcasc-default-config-mailer.yaml]
+  - it: should include blank mailer config in default config scripts when not configured
+    set:
+      JCasC:
+        defaultConfig: true
+    asserts:
+      - isNotNull:
+          path: data.[jcasc-default-config-mailer.yaml]
+      - matchSnapshot:
+          path: data.[jcasc-default-config-mailer.yaml]
+  - it: should not include mailer config in default config scripts when there is custom config script for the section
+    set:
+      JCasC:
+        defaultConfig: true
+        configScripts:
+          custom-override: |
+            unclassified:
+              mailer:
+                smtpHost: ""
+    asserts:
+      - isNull:
+          path: data.[jcasc-default-config-mailer.yaml]
+      - isNotNull:
+          path: data.[custom-override.yaml]

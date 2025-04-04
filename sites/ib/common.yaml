@@ -1,0 +1,420 @@
+customiseRoleMapping:
+  enabled: true
+  mappings:
+    # customise role mapping to grant user with 'view' role the ability to run and cancel jobs
+    Job-Build: view,edit,admin
+    Job-Cancel: view,edit,admin
+
+podAnnotations:
+  # For dynatrace
+  app_name: ib-jenkins
+  Support_Team: IBPlatforms
+  Management_zone: Omni-Digital
+
+persistentVolume:
+  additionalVolumes:
+    # will be automatically prefixed and therefore the PVC will be: jenkins-git-reference
+    # this is used to provide a permanent git reference repository, to eliminate the slow checkout of all of IB's project history from Bitbucket.
+    - name: git-reference
+      storage: 5Gi
+      accessMode: ReadWriteMany
+    # will be automatically prefixed and therefore the PVC will be: jenkins-maven-cache
+    # this is used to cache common maven artifacts across builds, to reduce slow downloads from Artifactory.
+    - name: maven-cache
+      storage: 25Gi
+      accessMode: ReadWriteMany
+
+JCasC:
+  defaultConfig: true
+
+  master:
+    mode: EXCLUSIVE
+    numExecutors: 0
+    proxy:
+      name: "10.38.141.33"
+      port: 80
+      noProxyHost: |-
+        *.service.dev
+        *.test
+        *.anz
+        *.anznb.co.nz
+
+  quietDown:
+    enableScript: true
+
+  anzBitbucket:
+    enabled: true
+    manageHooks: true
+    credentialsId: Bitbucket_ServiceAccount
+  pipelineLibraries:
+    csp-pipeline-utils:
+      repo: https://bitbucket.nz.service.anz/scm/dig/csp-pipeline.git
+      credentialsId: Bitbucket_ServiceAccount
+      includeInChangesets: false
+    openshift-pipeline:
+      repo: https://bitbucket.nz.service.anz/scm/pipe/openshift-pipeline.git
+      credentialsId: Bitbucket_ServiceAccount
+      includeInChangesets: false
+
+  envVars:
+    ARTIFACTORY_REPOSITORY_BASE_URL: https://artifactory.nz.service.anz/artifactory
+    ARTIFACTORY_REPOSITORY_ID: generic-ib-pipeline-local
+    DEPENDENCY_TRACK_BASE_URL: https://dependency-track.caas.nz.service.test
+    # reference repo path on Jenkins master (nonprod)
+    IB_REF_REPO_PATH: /var/lib/jenkins/gitref/internetbanking
+
+  vault:
+    credentials:
+      non-production-bvt-credentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Non-Production BVT Customer RM and Password"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" .
+          }}/pairs/non-production-bvt-credentials'
+        scope: GLOBAL
+      non-production-g3-api-key:
+        kind: vaultStringCredentialImpl
+        description: "Non Production G3 API Key"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: non-production-g3-api-key
+      non-production-regression-test:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Non-Production Regression Test Customer RM and Password"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" .
+          }}/pairs/non-production-regression-test'
+        scope: GLOBAL
+      Bitbucket_ServiceAccount:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Service account for BitBucket access"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" .
+          }}/pairs/Bitbucket_ServiceAccount'
+        scope: GLOBAL
+      artifactory-api-key:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "API Key for Artifactory"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" .
+          }}/pairs/artifactory-api-key'
+        scope: GLOBAL
+      staging-artifactory-api-key:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "API Key for Artifactory-Staging"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" .
+          }}/pairs/staging-artifactory-api-key'
+        scope: GLOBAL
+      checkmarx-token:
+        kind: vaultStringCredentialImpl
+        description: "Token for Checkmarx scans"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "checkmarx-token"
+      fortify-ci-token:
+        kind: vaultStringCredentialImpl
+        description: "CI Token for Fortify"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "fortify-ci-token"
+      itext-xml-key:
+        kind: vaultStringCredentialImpl
+        description: "Itext License Key as Xml to be export as file"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "itext-xml-key"
+      pipeline-sam-bearer-token:
+        kind: vaultStringCredentialImpl
+        description: "Token for SAM DriveTrain integration"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "pipeline-sam-bearer-token"
+      pipeline-preauth-bearer-token:
+        kind: vaultStringCredentialImpl
+        description: "Token for PreAuth DriveTrain integration"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "pipeline-preauth-bearer-token"
+      pipeline-ibat-bearer-token:
+        kind: vaultStringCredentialImpl
+        description: "Token for IBAT DriveTrain integration"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "pipeline-ibat-bearer-token"
+      pipeline-batchjobs-bearer-token:
+        kind: vaultStringCredentialImpl
+        description: "Token for Batch jobs DriveTrain integration"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "pipeline-batchjobs-bearer-token"
+      ib-jenkins-slave:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: "Credentials for local ib-jenkins users on slave nodes for IB."
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/pairs/ib-jenkins-slave'
+        scope: GLOBAL
+      dependency-track-api-key:
+        kind: vaultStringCredentialImpl
+        description: "API Key to access dependency track"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "dependency-track-api-key"
+      cs1-dev-openshift:
+        kind: vaultStringCredentialImpl
+        description: "OpenShift service account token for CS1-DEV cluster"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "cs1-dev-openshift"
+      cs2-dev-openshift:
+        kind: vaultStringCredentialImpl
+        description: "OpenShift service account token for CS2-DEV cluster"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "cs2-dev-openshift"
+
+  openshiftClouds:
+    # The "dev" cluster would be on the same "side" as the Jenkins master, mainly used to run slaves
+    dev:
+      serverUrl: "" # to be set by individual variants
+      namespace: "{{ .Release.Namespace }}"
+      webSocket: true
+      defaultsProviderTemplate: "default-jenkins-slave"
+      simpleTemplates:
+        commonPodAttributes:
+          idleMinutes: 10
+          instanceCap: 8
+          yamlMergeStrategy: "override"
+          volumes:
+            - persistentVolumeClaim:
+                claimName: '{{ include "jenkins.fullname" . }}-git-reference'
+                mountPath: "/var/lib/jenkins/gitref"
+                readOnly: false
+        commonContainerAttributes:
+          resourceRequestCpu: "200m"
+          resourceRequestMemory: "500Mi"
+          resourceLimitCpu: "4"
+          resourceLimitMemory: "10Gi"
+        commonEnvVars:
+          TZ: "Pacific/Auckland"
+          http_proxy: ""
+          https_proxy: ""
+          # Javascript parallelism constraint env vars. Tell it our pod limits.
+          # Needed because auto-detection counts host CPU & RAM, not container limits, causing excess use, and tasks to die.
+          # Stop broccoli parallelism. IB uses lerna instead. Total processes is approx: lerna CONCURRENT_BUILD_TASKS * broccoli JOBS
+          JOBS: "1"
+          CONCURRENT_BUILD_TASKS: "4"  # same as resourceLimitCpu
+        templates:
+          default-jenkins-slave:
+            label: "openshift"
+            image:
+              registry: "docker-ose-platform-local.artifactory-staging.nz.service.anz"
+              path: "jenkins-ocp-anz/ose-jenkins-agent-maven:20230623"
+            useGoInit: true
+            idleMinutes: ""
+            envVars:
+              # The environment variable of the default template would be inherited for all other pod templates
+              # whether they are defined below, or with podTemplate in the pipeline
+
+              # The kubernetes_backend environment variable would be consumed by vault-helper-functions.sh in the
+              # openshift-pipeline. See:
+              # https://bitbucket.nz.service.anz/projects/PIPE/repos/openshift-pipeline/browse/resources/vault-helper-functions.sh#61-64,86
+              # It can also be used by any other code that require loading secrets from Vault
+              kubernetes_backend: "{{ $.Values.JCasC.vault.mountPath }}"
+          nodejs12-maven-chrome-jenkins-slave:
+            label: "openshift maven nodejs12 chrome"
+            image:
+              registry: "docker-digital-image-builds-local.artifactory.nz.service.anz"
+              path: "jenkins-slave-maven-nodejs-chrome/jenkins-slave-maven-nodejs-chrome:java17-maven386-nodejs12-chrome114"
+            useGoInit: true
+          nodejs16-maven-chrome-jenkins-slave:
+            label: "openshift maven nodejs16 chrome"
+            image:
+              registry: "docker-digital-image-builds-local.artifactory.nz.service.anz"
+              path: "jenkins-slave-maven-nodejs-chrome/jenkins-slave-maven-nodejs-chrome:java17-maven396-nodejs16-chrome114"
+            useGoInit: true
+    # explicit cloud definition for the 2 non-prod clusters
+    cs1-dev:
+      serverUrl: "https://api.cs1-dev.nz.service.test:6443"
+      namespace: "{{ .Release.Namespace }}"
+      credentialsId: "cs1-dev-openshift"
+      webSocket: true
+      defaultsProviderTemplate: "default-jenkins-slave"
+      simpleTemplates:
+        templates:
+          default-jenkins-slave:
+            label: "cs1-dev"
+            image:
+              registry: "docker-ose-platform-local.artifactory-staging.nz.service.anz"
+              path: "jenkins-ocp-anz/ose-jenkins-agent-maven:20230623"
+            useGoInit: true
+            idleMinutes: ""
+            envVars:
+              kubernetes_backend: "kubernetes-cs1"
+    cs2-dev:
+      serverUrl: "https://api.cs2-dev.nz.service.test:6443"
+      namespace: "{{ .Release.Namespace }}"
+      credentialsId: "cs2-dev-openshift"
+      webSocket: true
+      defaultsProviderTemplate: "default-jenkins-slave"
+      simpleTemplates:
+        templates:
+          default-jenkins-slave:
+            label: "cs2-dev"
+            image:
+              registry: "docker-ose-platform-local.artifactory-staging.nz.service.anz"
+              path: "jenkins-ocp-anz/ose-jenkins-agent-maven:20230623"
+            useGoInit: true
+            idleMinutes: ""
+            envVars:
+              kubernetes_backend: "kubernetes-cs2"
+
+  permanentNodes:
+    commonAttributes:
+      # use as much as possible
+      mode: NORMAL
+      numExecutors: 1
+      retentionStrategy: "always"
+
+  scriptApproval:
+    - "method java.lang.Throwable printStackTrace"
+    - "method java.time.chrono.ChronoLocalDate isBefore java.time.chrono.ChronoLocalDate"
+    - "staticMethod java.time.format.DateTimeFormatter ofPattern java.lang.String"
+    - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods getAt java.util.Collection java.lang.String"
+
+  configScripts:
+    content-security-policy: |
+      groovy:
+        - script: |
+            System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "default-src 'self'; img-src 'self' data:; font-src 'self' data:;")
+
+ibJobsSnippet: |
+  bitbucketMultibranchPipelineJob(
+    jobName: "IB-Pipeline",
+    displayName: "IB-Pipeline",
+    project: "IB",
+    repo: "internetbanking",
+    credentialsId: "Bitbucket_ServiceAccount",
+    branchRegex: buildBranchRegex,
+    shallowCloneDepth: 1000,
+    cloneReference: '$IB_REF_REPO_PATH',
+    refSpecs: '+refs/heads/master:refs/remotes/@{remote}/master',
+  )
+
+ibatOpenshiftJobsSnippet: |
+  bitbucketMultibranchPipelineJob(
+    jobName: "IBAT-Openshift-Pipeline",
+    displayName: "IBAT-Openshift-Pipeline",
+    project: "IB",
+    repo: "internetbanking",
+    credentialsId: "Bitbucket_ServiceAccount",
+    scriptPath: "Jenkinsfile-IBAT-openshift",
+    branchRegex: buildBranchRegex,
+    shallowCloneDepth: 1000,
+    cloneReference: '$IB_REF_REPO_PATH',
+    refSpecs: '+refs/heads/master:refs/remotes/@{remote}/master',
+  )
+
+ibBatchJobsSnippet: |
+  bitbucketMultibranchPipelineJob(
+    jobName: "IB-Batch",
+    displayName: "IB Batch Jobs",
+    project: "IB",
+    repo: "internetbanking",
+    credentialsId: "Bitbucket_ServiceAccount",
+    scriptPath: "Jenkinsfile-BatchJobs",
+    branchRegex: buildBranchRegex,
+    shallowCloneDepth: 1000,
+    cloneReference: '$IB_REF_REPO_PATH',
+    refSpecs: '+refs/heads/master:refs/remotes/@{remote}/master',
+  )
+
+samJobsSnippet: |
+  bitbucketMultibranchPipelineJob(
+    jobName: "SAM",
+    displayName: "SAM-IB",
+    project: "DIG",
+    repo: "sam",
+    credentialsId: "Bitbucket_ServiceAccount",
+    scriptPath: "Jenkinsfile-ib",
+    branchRegex: buildBranchRegex,
+    shallowCloneDepth: 1000,
+    refSpecs: '+refs/heads/master:refs/remotes/@{remote}/master',
+  )
+  bitbucketMultibranchPipelineJob(
+    jobName: "SAM-FUNDS",
+    displayName: "SAM-Funds",
+    project: "DIG",
+    repo: "sam",
+    credentialsId: "Bitbucket_ServiceAccount",
+    scriptPath: "Jenkinsfile-funds",
+    branchRegex: buildBranchRegex,
+    shallowCloneDepth: 1000,
+    refSpecs: '+refs/heads/master:refs/remotes/@{remote}/master',
+  )
+
+IBSyntheticMonitorJobsSnippet: |
+  bitbucketMultibranchPipelineJob(
+    jobName: "IB-Synthetic-Monitor",
+    displayName: "IB-Synthetic-Monitoring",
+    project: "IB",
+    repo: "ib-synthetic-monitor",
+    credentialsId: "Bitbucket_ServiceAccount",
+    branchRegex: buildBranchRegex,
+    shallowCloneDepth: 1000,
+    refSpecs: '+refs/heads/master:refs/remotes/@{remote}/master',
+  )
+
+preauthOcpv4JobsSnippet: |
+  bitbucketMultibranchPipelineJob(
+    jobName: "Preauth-Pipeline",
+    displayName: "Preauth-Pipeline",
+    project: "DIG",
+    repo: "preauth",
+    credentialsId: "Bitbucket_ServiceAccount",
+    scriptPath: "Jenkinsfile",
+    branchRegex: buildBranchRegex,
+    shallowCloneDepth: 1000,
+    refSpecs: '+refs/heads/master:refs/remotes/@{remote}/master',
+  )
+
+ibImageCacheJobSnippet: |
+  bitbucketMultibranchPipelineJob(
+    jobName: "IB-Image-Cache",
+    displayName: "IB-Image-Cache",
+    project: "IB",
+    repo: "ib-image-cache",
+    credentialsId: "Bitbucket_ServiceAccount",
+    branchRegex: buildBranchRegex,
+    shallowCloneDepth: 1000,
+    refSpecs: '+refs/heads/master:refs/remotes/@{remote}/master',
+  )
+
+ibAcceptanceTestJobSnippet: |
+  bitbucketMultibranchPipelineJob(
+    jobName: "ib-acceptance-test-suite",
+    displayName: "IB Acceptance-Test Suite",
+    description: "IB Acceptance-Tests for triggering by PR builds and the IB Pipeline",
+    project: "IB",
+    repo: "ib-acceptance",
+    scriptPath: 'Jenkinsfile',
+    credentialsId: "Bitbucket_ServiceAccount",
+    branchRegex: buildBranchRegex,
+    shallowCloneDepth: 1000,
+    refSpecs: '+refs/heads/master:refs/remotes/@{remote}/master',
+  )
+
+ibMockServicesJobSnippet: |
+  bitbucketMultibranchPipelineJob(
+    jobName: "ib-mock-services",
+    displayName: "IB Mock Services",
+    description: "IB mocks (including mock-services and swingsim)",
+    project: "IB",
+    repo: "internetbanking",
+    credentialsId: "Bitbucket_ServiceAccount",
+    scriptPath: "ib.tools/ib-mocks/Jenkinsfile",
+    branchRegex: buildBranchRegex,
+    shallowCloneDepth: 1000,
+    cloneReference: '$IB_REF_REPO_PATH',
+    refSpecs: '+refs/heads/master:refs/remotes/@{remote}/master',
+  )

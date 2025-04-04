@@ -1,0 +1,255 @@
+customiseRoleMapping:
+  enabled: true
+  mappings:
+    # customise role mapping to grant user with 'view' role the ability to run and cancel jobs
+    Job-Build: view,edit,admin
+    Job-Cancel: view,edit,admin
+
+jnlpService:
+  enabled: true
+
+JCasC:
+  defaultConfig: true
+
+  adminAddress: "NZ WIS Jenkins <WisWave@anz.com>"
+
+  master:
+    mode: NORMAL
+    numExecutors: 5
+    proxy:
+      name: "10.38.141.33"
+      port: 80
+      noProxyHost: |-
+        *.service.dev
+        *.test
+        *.anz
+        *.anznb.co.nz
+
+  quietDown:
+    enableScript: true
+
+  anzBitbucket:
+    enabled: true
+    manageHooks: false
+    credentialsId: bitBucketUsernamePasswordCredentials
+
+  pipelineLibraries:
+    cspPipeline:
+      repo: https://bitbucket.nz.service.anz/scm/dig/csp-pipeline.git
+      credentialsId: bitBucketUsernamePasswordCredentials
+      includeInChangesets: true
+    openshiftPipeline:
+      repo: https://bitbucket.nz.service.anz/scm/pipe/openshift-pipeline.git
+      credentialsId: bitBucketUsernamePasswordCredentials
+      includeInChangesets: true
+
+  openshiftSync:
+    enabled: false
+
+  envVars:
+    csp_pipeline__disable_email_notifications: false
+    csp_pipeline__disable_slack_notifications: false
+    csp_pipeline__non_admin_user: nzdigitalcicddsa
+
+  vault:
+    credentials:
+      bitBucketUsernamePasswordCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Service account for BitBucket access"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/bitbucket'
+        scope: GLOBAL
+        usernameKey: "username"
+        passwordKey: "password"
+      devDBUsernamePasswordCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Service account for Dev DB access"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/db'
+        scope: GLOBAL
+        usernameKey: "devDBUserName"
+        passwordKey: "devDBPassword"
+      artifactoryUsernameApiKeyCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Username and API Key for Artifactory"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/artifactory'
+        scope: GLOBAL
+        usernameKey: "artifactory_username"
+        passwordKey: "artifactory_api_key"
+      artifactoryStagingUsernameApiKeyCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Username and API Key for Staging Artifactory"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/artifactory'
+        scope: GLOBAL
+        usernameKey: "staging_artifactory_username"
+        passwordKey: "staging_artifactory_api_key"
+      testArtifactoryUsernameApiKeyCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Username and API Key for test Artifactory"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/artifactory'
+        scope: GLOBAL
+        usernameKey: "test_artifactory_username"
+        passwordKey: "test_artifactory_api_key"
+      releaseArtifactoryUsernameApiKeyCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Username and API Key for release Artifactory"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/artifactory'
+        scope: GLOBAL
+        usernameKey: "release_artifactory_username"
+        passwordKey: "release_artifactory_api_key"
+      dependency-track-api-key:
+        kind: vaultStringCredentialImpl
+        description: "API Key to access dependency track"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/dependency-track'
+        scope: GLOBAL
+        vaultKey: "api_key"
+      checkmarx-token:
+        kind: vaultStringCredentialImpl
+        description: "CheckMarx token"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/checkmarx'
+        scope: GLOBAL
+        vaultKey: "token"
+      ssh_auth_sit:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: "Private key for ssh login into SIT"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/ssh'
+        scope: GLOBAL
+        privateKeyKey: "ssh_privatekey_sit"
+        usernameKey: "ssh_username_sit"
+        passphraseKey: "ssh_passcode_sit"
+      ssh_auth_oat:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: "Private key for ssh login into OAT"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials//ssh'
+        scope: GLOBAL
+        privateKeyKey: "ssh_privatekey_sit"
+        usernameKey: "ssh_username_sit"
+        passphraseKey: "ssh_passcode_sit"
+      cs1-dev-openshift:
+        kind: vaultStringCredentialImpl
+        description: "OpenShift service account token for CS1-DEV cluster"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/openshift-service-account'
+        scope: GLOBAL
+        vaultKey: "cs1-dev-openshift"
+      cs2-dev-openshift:
+        kind: vaultStringCredentialImpl
+        description: "OpenShift service account token for CS2-DEV cluster"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/openshift-service-account'
+        scope: GLOBAL
+        vaultKey: "cs2-dev-openshift"
+
+  openshiftClouds:
+    # explicit cloud definition for the non-prod cluster
+    openshift_non_prod:
+      namespace: "wis-ci"
+      serverUrl: "" # to be set by individual variants
+      credentialsId: "" # to be set by individual variants
+      skipTlsVerify: false
+      webSocket: true
+
+  scriptApproval:
+    - "method groovy.lang.GroovyObject getProperty java.lang.String"
+    - "method groovy.util.XmlSlurper parse java.io.InputStream"
+    - "new groovy.util.XmlSlurper"
+    - "new java.io.ByteArrayInputStream byte[]"
+    - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods findAll java.lang.Object groovy.lang.Closure"
+    - "staticMethod org.codehaus.groovy.runtime.EncodingGroovyMethods decodeBase64 java.lang.String"
+
+  configScripts:
+    content-security-policy: |
+      groovy:
+        - script: |
+            System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "default-src 'self'; img-src 'self' data:; font-src 'self' data:;")
+
+WISFeatureBranchJobsSnippet: |
+  bitbucketOrganizationFolder(
+    folderName: "wis-feature-branches",
+    displayName: "WIS Feature Branches",
+    project: "DIG",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    repoRegex: buildRepoRegex,
+    branchRegex: buildBranchRegex,
+    scriptPath: "Jenkinsfile_Main",
+    periodicScanInterval:"1h",
+   )
+
+WISReleaseBranchJobsSnippet: |
+  bitbucketOrganizationFolder(
+    folderName: "wis-release-branches",
+    displayName: "WIS Release Branches",
+    project: "DIG",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    repoRegex: buildRepoRegex,
+    branchRegex: buildBranchRegex,
+    scriptPath: "Jenkinsfile_Main",
+    periodicScanInterval:"1d",
+   )
+
+WISMasterBranchJobSnippet: |
+  bitbucketOrganizationFolder(
+    folderName: "wis-master",
+    displayName: "WIS Master",
+    project: "DIG",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    repoRegex: buildRepoRegex,
+    branchRegex: buildBranchRegex,
+    scriptPath: "Jenkinsfile_Main",
+    periodicScanInterval:"1d",
+   )
+
+WISSpecificationTestSnippet: |
+  bitbucketPipelineJob(
+    jobName: "wis-specification-test",
+    displayName: "WIS-SpecificationTest",
+    description: "Utility job allowing you to run the concordion tests (or a subset) against your feature branch or a tag.  This is faster than running on a DEV VM, since the test suites (Standard/Admin/Wallet) run in parallel.",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/dig/wis.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    branch: '^${BRANCH_OR_TAG}',
+    scriptPath: "Jenkinsfile_SpecificationTests",
+    lightweight: false,
+    buildRetentionNumStr: "20",
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+    parametersNeeded: true,
+    stringParams: [[name: 'BRANCH', desc: 'Branch name?'], [name: 'BRANCH_OR_TAG', desc: 'The branch or tag to run the tests against. Tags must start with refs/tags/.\n\nExample branch: feature/EBT-1234-a-feature-branch \n\nExample tag: refs/tags/www-3.3']],
+    choiceParams: [[name: 'TEST_CHOICE', desc: 'Which test suite to run?', options: ['All', 'Standard', 'AdminUI', 'Smoke']]],
+  )
+
+WISDBUpgradeSnippet: |
+  bitbucketPipelineJob(
+    jobName: "wis-db-upgrade",
+    displayName: "WIS.DB.Upgrade",
+    description: 'Used to deploy DB changes to a particular database.  Database changes are not automatically applied by "WIS.Deploy".\nThis upgrade can be done on Developers and SIT DB. (not on OAT or Production)\nSee:\nhttps://confluence.nz.service.anz/x/RzA8#WISReleasesTechnical-re.tagging.wis.for.sit.dbRe-taggingWISwhendeployingDBchangestoSIT',
+    gitUrl: "https://bitbucket.nz.service.anz/scm/dig/wis.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    branch: 'refs/tags/^${TAG}',
+    scriptPath: "Jenkinsfile_DB",
+    lightweight: false,
+    buildRetentionNumStr: "10",
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+    parametersNeeded: true,
+    stringParams: [[name: 'TAG', desc: 'TAG name?'], [name: 'DB_NAME', desc: 'DB Name: dev01, dev12, etc.']],  
+  )
+
+WISDeploySnippet: |
+  bitbucketPipelineJob(
+    jobName: "wis-deploy",
+    displayName: "WIS.Deploy",
+    description: 'Enables you to deploy a specific build to SIT or OAT, without having to progress through the full pipeline.  For example, you may need to deploy an old release to SIT for testing, then restore the current master build to SIT. \nRefer to Artifactory below: \n- Release Version: https://artifactory-staging.nz.service.anz/artifactory/maven-digital-releases-local/com/anz/wis/wis-ear \n- Snapshot Version: https://artifactory-staging.nz.service.anz/artifactory/maven-digital-snapshots-local/com/anz/wis/wis-ear', 
+    gitUrl: "https://bitbucket.nz.service.anz/scm/dig/wis.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    branch: 'master',
+    scriptPath: "Jenkinsfile_Deploy",
+    lightweight: false,
+    buildRetentionNumStr: "20",
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+    parametersNeeded: true,
+    stringParams: [[name: 'URL', desc: 'Artifactory URL for the package to deploy ZIP file.']],
+    choiceParams: [[name: 'ENV_CHOICE', desc: 'Which environment to deploy?', options: ['sit', 'oat']]],
+  )

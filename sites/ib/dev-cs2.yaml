@@ -1,0 +1,5 @@
+JCasC:
+  openshiftClouds:
+    dev:
+      serverUrl: "https://api.cs2-dev.nz.service.test:6443"
+      credentialsId: "cs2-dev-openshift"

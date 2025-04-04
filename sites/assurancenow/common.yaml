@@ -1,0 +1,159 @@
+image:
+  repository: assurancenow-ci/jenkins-helm
+
+persistentVolume:
+  storage: 10Gi
+  additionalVolumes:
+    - name: data
+      storage: 10Gi
+      accessMode: ReadWriteMany
+    - name: workspace
+      storage: 50Gi
+      accessMode: ReadWriteMany
+
+JCasC:
+  defaultConfig: true
+  adminAddress: "AssuranceNow Jenkins <assurancenow@anz.com>"
+
+  master:
+    mode: NORMAL
+    numExecutors: 5
+    proxy:
+      name: "10.38.141.33"
+      port: 80
+      noProxyHost: |-
+        *.service.dev
+        *.test
+        *.anz
+        *.anznb.co.nz
+
+  quietDown:
+    enableScript: true
+
+  anzBitbucket:
+    enabled: true
+    manageHooks: false
+    credentialsId: bitbucket
+
+  pipelineLibraries:
+    openshiftPipeline:
+      repo: https://bitbucket.nz.service.anz/scm/pipe/openshift-pipeline.git
+      credentialsId: bitbucket
+      includeInChangesets: true
+
+  vault:
+    credentials:
+      artifactory:
+        kind: vaultUsernamePasswordCredentialImpl
+        scope: GLOBAL
+        description: "Artifactory credentials"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/artifactory-user'
+      bitbucket:
+        kind: vaultUsernamePasswordCredentialImpl
+        scope: GLOBAL
+        description: "Service account for BitBucket access"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/bitbucket-user'
+      checkmarx:
+        kind: vaultStringCredentialImpl
+        scope: GLOBAL
+        description: "Checkmarx token"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/checkmarx-token'
+      dependency-track:
+        kind: vaultStringCredentialImpl
+        scope: GLOBAL
+        description: "Dependency Track token"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/dependency-track-token'
+      drivetrain:
+        kind: vaultStringCredentialImpl
+        scope: GLOBAL
+        description: "Drivetrain token"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/drivetrain-token'
+      slack:
+        kind: vaultUsernamePasswordCredentialImpl
+        scope: GLOBAL
+        description: "Token for Slack notifications"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/slack-token'
+
+      openshift-cs1-dev:
+        kind: vaultStringCredentialImpl
+        scope: GLOBAL
+        description: "Token for Jenkins service account in OpenShift 4 cs1-dev"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/openshift-cs1-dev-token'
+      openshift-cs2-dev:
+        kind: vaultStringCredentialImpl
+        scope: GLOBAL
+        description: "Token for Jenkins service account in OpenShift 4 cs2-dev"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/openshift-cs2-dev-token'
+
+      test-s3-secret-access-key:
+        kind: vaultStringCredentialImpl
+        scope: GLOBAL
+        description: "S3 secret access key for integration testing"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/test-s3-secret-access-key'
+
+  openshiftClouds:
+    cs1-dev:
+      serverUrl: "https://api.cs1-dev.nz.service.test:6443"
+      credentialsId: "openshift-cs1-dev"
+      namespace: "{{ .Release.Namespace }}"
+      skipTlsVerify: false
+      webSocket: true
+    cs2-dev:
+      serverUrl: "https://api.cs2-dev.nz.service.test:6443"
+      credentialsId: "openshift-cs2-dev"
+      namespace: "{{ .Release.Namespace }}"
+      skipTlsVerify: false
+      webSocket: true
+    nonprod:
+      # serverUrl and credentialsId set by variants
+      namespace: "{{ .Release.Namespace }}"
+      skipTlsVerify: false
+      webSocket: true
+      defaultsProviderTemplate: "nodejs20-agent"
+      simpleTemplates:
+        commonPodAttributes:
+          idleMinutes: 2
+          instanceCap: 12
+          yamlMergeStrategy: "override"
+          volumes:
+            - persistentVolumeClaim:
+                claimName: "jenkins-data"
+                mountPath: "/jenkins-data"
+                readOnly: false
+          workspaceVolume:
+            persistentVolumeClaimWorkspaceVolume:
+              claimName: "jenkins-workspace"
+              readOnly: false
+        commonContainerAttributes:
+          resourceRequestCpu: "0.2"
+          resourceRequestMemory: "512Mi"
+          resourceLimitCpu: "2"
+          resourceLimitMemory: "4Gi"
+          alwaysPullImage: true
+        commonEnvVars:
+          TZ: "Pacific/Auckland"
+          HTTP_PROXY: ""
+          HTTPS_PROXY: ""
+          http_proxy: ""
+          https_proxy: ""
+          JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF-8"
+        templates:
+          nodejs20-agent:
+            label: "openshift nodejs20"
+            image:
+              registry: "docker-assurancenow-local.artifactory-staging.nz.service.anz"
+              path: "jenkins/nodejs-agent:20"
+            useGoInit: true
+          nodejs22-agent:
+            label: "openshift nodejs22"
+            image:
+              registry: "docker-assurancenow-local.artifactory-staging.nz.service.anz"
+              path: "jenkins/nodejs-agent:22"
+            useGoInit: true
+          # Agent for testing out new images
+          nodejs-dev-agent:
+            label: "openshift nodejs-dev"
+            image:
+              registry: "docker-assurancenow-local.artifactory-staging.nz.service.anz"
+              path: "jenkins/nodejs-agent:dev"
+            useGoInit: true

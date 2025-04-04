@@ -1,0 +1,8 @@
+JCasC:
+  quietDown:
+    # cs2 cluster contains the backup instance, in quiet down mode by default
+    quietDown: true
+  openshiftClouds:
+    prod:
+      serverUrl: "https://api.cs2.nz.service.anz:6443"
+      credentialsId: "cs2-prod-openshift"

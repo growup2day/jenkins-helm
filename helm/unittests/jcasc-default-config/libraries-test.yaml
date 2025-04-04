@@ -1,0 +1,45 @@
+templates:
+  - config-jcasc.yaml
+tests:
+  - it: should include pipeline libraries config in default config scripts when configured
+    set:
+      JCasC:
+        defaultConfig: true
+        pipelineLibraries:
+          pipeline-lib1:
+            repo: https://bitbucket.nz.service.anz/some/dummy-pipeline.git
+            credentialsId: "anz-bitbucket-cred"
+            includeInChangesets: false
+          pipeline-lib2:
+            repo: https://bitbucket.nz.service.anz/some/other-dummy-pipeline.git
+            includeInChangesets: true
+    asserts:
+      - isNotNull:
+          path: data.[jcasc-default-config-libraries.yaml]
+      - matchSnapshot:
+          path: data.[jcasc-default-config-libraries.yaml]
+  - it: should include blank pipeline libraries config in default config scripts when not configured
+    set:
+      JCasC:
+        defaultConfig: true
+    asserts:
+      - isNotNull:
+          path: data.[jcasc-default-config-libraries.yaml]
+      - matchSnapshot:
+          path: data.[jcasc-default-config-libraries.yaml]
+  - it:
+      should not include pipeline libraries config in default config scripts when there is custom config script for the
+      section
+    set:
+      JCasC:
+        defaultConfig: true
+        configScripts:
+          custom-override: |
+            unclassified:
+              globalLibraries:
+                libraries: []
+    asserts:
+      - isNull:
+          path: data.[jcasc-default-config-libraries.yaml]
+      - isNotNull:
+          path: data.[custom-override.yaml]

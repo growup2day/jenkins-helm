@@ -1,0 +1,75 @@
+persistentVolume:
+    storage: 50Gi
+
+jenkins_java_overrides: -Dmail.smtp.starttls.enable=true -Dmail.smtp.ssl.trust=smtp.anz.co.nz
+
+JCasC:
+    configScripts:
+        multi-branch-jobs: |
+            jobs:
+              - script: |
+                  {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+
+                  def buildBranchRegex = 'master'
+                  def displayNameSuffix = 'Master Branch'
+                  {{- tpl $.Values.PlatformsJobsSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.MakinuiB2CAuthJobsSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.MakinuiB2CUnAuthJobsSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.ApiOpsSnippet $ | nindent 6 }}
+
+    vault:
+        vaultUrl: "https://vault.nzlb.service.anz:8200"
+        credentials:
+            cs1-prod-openshift:
+                kind: vaultStringCredentialImpl
+                description: "OpenShift service account token for CS1-PROD cluster"
+                path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+                scope: GLOBAL
+                vaultKey: "cs1-prod-openshift"
+
+            cs2-prod-openshift:
+                kind: vaultStringCredentialImpl
+                description: "OpenShift service account token for CS2-PROD cluster"
+                path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+                scope: GLOBAL
+                vaultKey: "cs2-prod-openshift"
+
+            amq-prod-openshift:
+                kind: vaultStringCredentialImpl
+                description: "OpenShift service account token for AMQ-PROD cluster"
+                path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+                scope: GLOBAL
+                vaultKey: "amq-prod-openshift"
+
+    openshiftClouds:
+        # explicit cloud definition for the prod cluster
+        openshift_production:
+            serverUrl: "" # to be set by individual variants
+            namespace: "{{ .Release.Namespace }}"
+            credentialsId: "" # to be set by individual variants
+            skipTlsVerify: false
+            webSocket: true
+        # explicit cloud definition for the 2 prod OCP4 clusters
+        openshift_cs1_prod:
+            serverUrl: "https://api.cs1.nz.service.anz:6443"
+            namespace: "{{ .Release.Namespace }}"
+            credentialsId: "cs1-prod-openshift"
+            skipTlsVerify: false
+            webSocket: true
+        openshift_cs2_prod:
+            serverUrl: "https://api.cs2.nz.service.anz:6443"
+            namespace: "{{ .Release.Namespace }}"
+            credentialsId: "cs2-prod-openshift"
+            skipTlsVerify: false
+            webSocket: true
+        # explicit cloud definition for prod AMQ cluster
+        openshift_amq_prod:
+            serverUrl: "https://api.caas-amq.nz.service.anz:6443"
+            namespace: "{{ .Release.Namespace }}"
+            credentialsId: "amq-prod-openshift"
+            skipTlsVerify: false
+            webSocket: true
+
+    mailer:
+        smtpHost: smtp.anz.co.nz
+        smtpPort: 25

@@ -1,0 +1,106 @@
+podAnnotations:
+  # For Dynatrace. Jenkins non-prod does not fit usual env values. We use Acceptance for the non-prod PR build jenkins.
+  environment: A
+
+# Default environment variables to be configured on the Stateful Set.
+# This is different from the envVars in JCasC, which is used to configure global environment variables in Jenkins.
+env:
+  # Workaround for apparent? deadlock in openshift client plugin when lots of PR's try to configure openshift at the same time.
+  # Default in the plugin is 25. Using 250 is excessive but seems to work and may not be worth tuning down?
+  OPENSHIFT_CLIENT_PLUGIN_EXECUTOR_POOL_SIZE: "250"
+
+# Non-Prod IB Jenkins requires higher CPU/RAM limit to burst to when multiple PR builds gets kicked off at the same time
+resources:
+  limits:
+    cpu: "4"
+    memory: 8Gi
+  requests:
+    cpu: 200m
+    memory: 500Mi
+
+persistentVolume:
+  storage: 200Gi
+
+JCasC:
+  envVars:
+    ARTIFACTORY_REPOSITORY_BASE_URL: https://artifactory-staging.nz.service.anz/artifactory
+
+  vault:
+    vaultUrl: "https://vault-preprod.nzlb.service.test:8200"
+    credentials:
+      dev-artifactory-api-key:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "API Key for Artifactory-dev"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" .
+          }}/pairs/dev-artifactory-api-key'
+        scope: GLOBAL
+
+  permanentNodes:
+    enabled: true
+    commonAttributes:
+      nodeProperties:
+        - toolLocation:
+            locations:
+              - home: "/usr/lib/jvm/java-1.8.0"
+                key: "hudson.model.JDK$DescriptorImpl@JDK 1.8"
+        - envVars:
+            env:
+              # reference repo path on Jenkins VM slave (nonprod)
+              - key: "IB_REF_REPO_PATH"
+                value: "/app/data/gitref/internetbanking"
+      remoteFS: "/app/data/jenkins-slave"
+
+  openshiftClouds:
+    dev:
+      simpleTemplates:
+        templates:
+          default-jenkins-slave:
+            containerAttributes:
+              resourceLimitCpu: "2"
+              resourceLimitMemory: "1Gi"
+          master-jenkins-slave:
+            # slave to run for the `node('master')` part of the pipeline - instead of running in the Jenkins master node
+            label: "master python oc jq skopeo"
+            image:
+              registry: "docker-ose-platform-local.artifactory-staging.nz.service.anz"
+              path: "jenkins-ocp-anz/ose-jenkins-agent-maven:20230623"
+            useGoInit: true
+            podAttributes:
+              idleMinutes: 60
+              instanceCap: 5
+              nodeUsageMode: EXCLUSIVE
+
+  configScripts:
+    multi-branch-jobs: |
+      jobs:
+        - script: |
+            {{- .Files.Get "groovy-lib/multibranch-pipeline-helper.groovy" | nindent 6 }}
+
+            def buildBranchRegex = 'PR-.*'
+            {{- tpl $.Values.ibJobsSnippet $ | nindent 6 }}
+            {{- tpl $.Values.ibatOpenshiftJobsSnippet $ | nindent 6 }}
+            {{- tpl $.Values.preauthOcpv4JobsSnippet $ | nindent 6 }}
+            {{- tpl $.Values.samJobsSnippet $ | nindent 6 }}
+            {{- tpl $.Values.IBSyntheticMonitorJobsSnippet $ | nindent 6 }}
+            {{- tpl $.Values.ibImageCacheJobSnippet $ | nindent 6 }}
+            {{- tpl $.Values.ibAcceptanceTestJobSnippet $ | nindent 6 }}
+            {{- tpl $.Values.ibMockServicesJobSnippet $ | nindent 6 }}
+
+            // BatchJobs builds in nonprod are manually triggered by changing the branch regex
+            // When we move to PR-.* (eventually), we need to update the IB BitBucket PR signoff to expect THREE successful builds (IB, IBAT Openshift, AND BatchJobs)
+            buildBranchRegex = 'PR-nnnn'
+            {{- tpl $.Values.ibBatchJobsSnippet $ | nindent 6 }}
+
+    pipeline-jobs: |
+      jobs:
+        - script: |
+            {{- .Files.Get "groovy-lib/pipeline-helper.groovy" | nindent 6 }}
+            bitbucketPipelineJob(
+              jobName: "IB-Frontend-Mocks",
+              gitUrl: "https://bitbucket.nz.service.anz/scm/ib/internetbanking.git",
+              credentialsId: "Bitbucket_ServiceAccount",
+              branch: "master",
+              scriptPath: 'ib-public/ib-static-web/Jenkinsfile-FEMocks',
+              shallowCloneDepth: 1,
+            )

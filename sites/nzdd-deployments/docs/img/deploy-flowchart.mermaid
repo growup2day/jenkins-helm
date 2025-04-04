@@ -1,0 +1,25 @@
+%%{init: {'theme':'base'}}%%
+flowchart TD
+    subgraph deploy.sh
+    D --> E[Sets Cluster/Namespace]
+    E --> F{Does Jenkins Image Exist and Digests Match?}
+    F --> |yes| K[Package Helm Chart]
+    F --> |no| H{Environment?}
+    H --> |Production| I[Copy Image from Dev to Prod]
+    H --> |Development| J[Build image]
+    I --> K[Package Helm Chart]
+    J --> K
+    K --> L[Deploy Helm Chart]
+    L --> M{Did the stateful set observe generation change?}
+    M --> |yes| N[Deployed]
+    M --> |no| O[Run Python script to reload Jenkins configuration]
+    O --> N
+    end
+    subgraph run.sh
+    A(Start Terminal) --> B[Run Custom Deploy Wrapper]
+    B --> C{Is Helm chart valid?}
+    C --> |no| Z[Fail]
+    P[Upload Files]
+    end
+    C --> |yes| D(Run Deploy Script)
+    N --> P[Upload Files]

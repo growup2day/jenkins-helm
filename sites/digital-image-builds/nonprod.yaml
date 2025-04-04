@@ -1,0 +1,14 @@
+persistentVolume:
+  storage: 50Gi
+
+JCasC:
+  vault:
+    vaultUrl: "https://vault-preprod.nzlb.service.test:8200"
+  configScripts:
+    multi-branch-jobs: |
+      jobs:
+        - script: |
+            {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+
+            def buildBranchRegex = 'feature.*'
+            {{- tpl $.Values.DigitalImagesJobsSnippet $ | nindent 6 }}

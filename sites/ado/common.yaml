@@ -1,0 +1,98 @@
+# The config that is common across all dev and prod clusters
+
+# The base path to the credentials in vault accessed by Jenkins. Note that the ado-jenkins service account is only permitted access to the sub-path in vault
+# that matches "secret/context/<OpenShift namespace>/<Service Account Name>/*". E.g. secret/context/ado-ci/ado-jenkins/* can be accessed by a service account
+# with the name ado-jenkins deployed under the ado-ci OpenShift namespace.
+secretPathRoot: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}'
+
+JCasC:
+  defaultConfig: true
+  vault:
+    enabled: true
+    credentials:
+      jenkins-ssh-to-bitbucket:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: "Credentials for SSH access to BitBucket."
+        path: '{{ tpl .Values.secretPathRoot $ }}/jenkins-ssh-to-bitbucket'
+        scope: GLOBAL
+      jenkins-ssh-to-slaves:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: "Credentials for SSH access from the Jenkins master to the slaves."
+        path: '{{ tpl .Values.secretPathRoot $ }}/jenkins-ssh-to-slaves'
+        scope: GLOBAL
+      jenkins-as-nzadocicdt1dsa-artifactory-prod:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Credentials for token based access to Artifactory prod."
+        path: '{{ tpl .Values.secretPathRoot $ }}/jenkins-as-nzadocicdt1dsa-artifactory-prod'
+        scope: GLOBAL
+      jenkins-as-x2nzadocicddsa:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Credentials for OAT vDirect traffic management."
+        path: '{{ tpl .Values.secretPathRoot $ }}/jenkins-as-x2nzadocicddsa'
+        scope: GLOBAL
+  master:
+    mode: EXCLUSIVE
+    numExecutors: 5
+  # Sets up the ADO global pipeline library.
+  pipelineLibraries:
+    ado-utils:
+      repo: ssh://bitbucket.nz.service.anz:7998/ado/jenkins-utils.git
+      credentialsId: "jenkins-ssh-to-bitbucket"
+  configScripts:
+    # Allow the health check report html file to inline CSS
+    content-security-policy: |
+      groovy:
+        - script: |
+            System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "default-src 'self'; img-src 'self' data:; font-src 'self' data:; style-src 'self' 'unsafe-inline';")
+    jobs-setup: |
+      jobs:
+        - script: |
+            {{- .Files.Get "groovy-lib/pipeline-helper.groovy" | nindent 6 }}
+            def commonOptions = [
+                gitUrl: "ssh://bitbucket.nz.service.anz:7998/ado/jenkins-utils.git",
+                credentialsId: "jenkins-ssh-to-bitbucket",
+                branch: "master",
+                pollSCMSpec: '',
+                triggerBuildOnPush: false,
+                buildRetentionNumStr: "100"
+            ]
+            bitbucketPipelineJob(commonOptions + [
+                jobName: "Stop or Start Core, ADO, or Preauth",
+                scriptPath: 'pipelineJobs/production/stop-or-start-apps/Jenkinsfile'
+              ]
+            )
+            bitbucketPipelineJob(commonOptions + [
+                jobName: "Check Health and Version Info",
+                scriptPath: 'pipelineJobs/production/health-and-version-check/Jenkinsfile'
+              ]
+            )
+            bitbucketPipelineJob(commonOptions + [
+                jobName: "Deploy ADO and Preauth",
+                scriptPath: 'pipelineJobs/production/deploy-ado-and-preauth/Jenkinsfile'
+              ]
+            )
+            bitbucketPipelineJob(commonOptions + [
+                jobName: "Deploy Core",
+                scriptPath: 'pipelineJobs/production/deploy-core/Jenkinsfile'
+              ]
+            )
+            bitbucketPipelineJob(commonOptions + [
+                jobName: "Disable or Enable Port Forwarding for ADO and Preauth",
+                scriptPath: 'pipelineJobs/production/stop-or-start-port-forwarding/Jenkinsfile'
+              ]
+            )
+            bitbucketPipelineJob(commonOptions + [
+                jobName: "Deploy Static Content",
+                scriptPath: 'pipelineJobs/production/deploy-static-content/Jenkinsfile'
+              ]
+            )
+            bitbucketPipelineJob(commonOptions + [
+                jobName: "Deploy Patch to ADO",
+                scriptPath: 'pipelineJobs/production/deploy-patch/Jenkinsfile'
+              ]
+            )
+            bitbucketPipelineJob(commonOptions + [
+                jobName: "Manage ADO Traffic - New NZ Domains",
+                scriptPath: 'pipelineJobs/production/manage-traffic-nz-domains/Jenkinsfile'
+              ]
+            )

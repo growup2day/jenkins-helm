@@ -1,0 +1,8 @@
+domain: caas.nz.service.test
+
+defaultImageRegistry: docker-registry.default.svc:5000
+
+JCasC:
+  vault:
+    namespace: nonprod
+    mountPath: kubernetes

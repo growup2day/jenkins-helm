@@ -1,0 +1,40 @@
+templates:
+  - config-jcasc.yaml
+tests:
+  - it: should include script approval config in default config scripts when configured
+    set:
+      JCasC:
+        defaultConfig: true
+        scriptApproval:
+          - "method groovy.json.JsonSlurperClassic parseText java.lang.String"
+          - "new groovy.json.JsonSlurperClassic"
+    asserts:
+      - isNotNull:
+          path: data.[jcasc-default-config-script-approval.yaml]
+      - matchSnapshot:
+          path: data.[jcasc-default-config-script-approval.yaml]
+  - it: should include blank script approval config in default config scripts when not configured
+    set:
+      JCasC:
+        defaultConfig: true
+    asserts:
+      - isNotNull:
+          path: data.[jcasc-default-config-script-approval.yaml]
+      - matchSnapshot:
+          path: data.[jcasc-default-config-script-approval.yaml]
+  - it:
+      should not include script approval config in default config scripts when there is custom config script for the
+      section
+    set:
+      JCasC:
+        defaultConfig: true
+        configScripts:
+          custom-override: |
+            security:
+              scriptApproval:
+                approvedSignatures: []
+    asserts:
+      - isNull:
+          path: data.[jcasc-default-config-script-approval.yaml]
+      - isNotNull:
+          path: data.[custom-override.yaml]

@@ -1,0 +1,6 @@
+domain: apps.cs2.nz.service.anz
+
+JCasC:
+  vault:
+    namespace: prod
+    mountPath: kubernetes-cs2

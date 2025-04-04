@@ -1,0 +1,11 @@
+# Required by openshift-pipeline
+ansicolor:1.0.1
+artifactory:3.13.1
+htmlpublisher:1.25
+lockable-resources:2.11
+openshift-client:1.0.35
+slack:2.49
+timestamper:1.13
+
+# integration with NZ Vault
+hashicorp-vault-plugin:3.8.0

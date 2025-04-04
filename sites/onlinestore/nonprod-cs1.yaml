@@ -1,0 +1,10 @@
+JCasC:
+  openshiftClouds:
+    openshift_non_prod:
+      serverUrl: "https://api.cs1-dev.nz.service.test:6443"
+      namespace: "{{ .Release.Namespace }}"
+      webSocket: true
+
+  permanentNodes:
+    commonAttributes:
+      remoteFS: "D:\\OLSWorkspaceCS1"

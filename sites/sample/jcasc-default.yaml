@@ -1,0 +1,58 @@
+JCasC:
+  configScripts:
+    anonymous-access: |
+      groovy:
+        - script: |
+            {{- .Files.Get "groovy-lib/anonymous-access-helper.groovy" | nindent 6 }}
+            setAnonymousAccess(["Overall-Read", "Job-Read"] as String[])
+
+  defaultConfig: true
+
+  master:
+    mode: NORMAL
+    numExecutors: 3
+    # set if Jenkins master needs to connect to the internet (e.g. for Slack integration)
+    proxy:
+      name: "10.38.34.10"
+      port: 80
+      noProxyHost: |-
+        *.service.dev
+        *.test
+        *.anz
+        *.anznb.co.nz
+  # Set to configure ANZ BitBucket server
+  anzBitbucket:
+    enabled: true
+  # Set to configure SlackNotifier plugin
+  slackNotifier:
+    credentialId: "slack"
+  # Set to configure SlackNotifier plugin
+  pipelineLibraries:
+    openshiftPipeline:
+      repo: https://bitbucket.nz.service.anz/scm/pipe/openshift-pipeline.git
+      credentialsId: "bitbucket"
+      includeInChangesets: false
+  vault:
+    credentials:
+      bitbucket:
+        kind: vaultUsernamePasswordCredentialImpl
+        scope: GLOBAL
+        description: "Service account for BitBucket access"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/pairs/bitbucket'
+      artifactory-api-key:
+        kind: vaultUsernamePasswordCredentialImpl
+        scope: GLOBAL
+        description: "API Key for Artifactory"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" .
+          }}/pairs/artifactory-api-key'
+      fortify-ci-token:
+        kind: vaultStringCredentialImpl
+        scope: GLOBAL
+        description: "CI Token for Fortify"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        vaultKey: "fortify-ci-token"
+  openshiftClouds:
+    dev:
+      serverUrl: "https://api.cs2-dev.nz.service.test:6443"
+      namespace: "{{ .Release.Namespace }}"

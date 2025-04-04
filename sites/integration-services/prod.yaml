@@ -1,0 +1,46 @@
+persistentVolume:
+    storage: 50Gi
+
+JCasC:
+    master:
+        proxy:
+            name: "nzswg-app.nz.service.anz"
+            port: 80
+            noProxyHost: |-
+                *.service.dev
+                *.test
+                *.anz
+                *.anznb.co.nz
+    configScripts:
+        multi-branch-jobs: |
+            jobs:
+              - script: |
+                  {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+
+                  def buildBranchRegex = 'master'
+                  def displayNameSuffix = 'Master Branch'
+                  {{- tpl $.Values.FastifyServicesJobsSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.FastifyLibsJobsSnippet $ | nindent 6 }}
+                  {{- tpl $.Values.ApiSpecsJobsSnippet $ | nindent 6 }}
+
+    openshiftClouds:
+        # explicit cloud definition for the prod cluster
+        openshift_production:
+            serverUrl: "" # to be set by individual variants
+            namespace: "{{ .Release.Namespace }}"
+            credentialsId: "" # to be set by individual variants
+            skipTlsVerify: false
+            webSocket: true
+        # explicit cloud definition for the 2 OCP4 prod clusters
+        openshift_cs1_prod:
+            serverUrl: "https://api.cs1.nz.service.anz:6443"
+            namespace: "{{ .Release.Namespace }}"
+            credentialsId: "cs1-prod-openshift"
+            skipTlsVerify: false
+            webSocket: true
+        openshift_cs2_prod:
+            serverUrl: "https://api.cs2.nz.service.anz:6443"
+            namespace: "{{ .Release.Namespace }}"
+            credentialsId: "cs2-prod-openshift"
+            skipTlsVerify: false
+            webSocket: true

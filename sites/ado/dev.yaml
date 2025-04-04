@@ -1,0 +1,33 @@
+# The config that is common across both dev clusters
+JCasC:
+  vault:
+    vaultUrl: "https://vault-preprod.nzlb.service.test:8200"
+    credentials:
+      jenkins-ssh-from-slaves-to-app-servers:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: "Credentials for SSH access from the Jenkins slaves to the dev/test app servers."
+        path: '{{ tpl .Values.secretPathRoot $ }}/jenkins-ssh-from-slaves-to-app-servers'
+        scope: GLOBAL
+      jenkins-ssh-from-slaves-to-iis-servers:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: "Credentials for SSH access from the Jenkins slaves to the dev/test IIS web servers."
+        path: '{{ tpl .Values.secretPathRoot $ }}/jenkins-ssh-from-slaves-to-iis-servers'
+        scope: GLOBAL
+  # Set an environment variable on the slave. Used by the pipeline scripts to determine which app region configuration to load (Dev/Test1/2/3 vs OAT/Prod)
+  envVars:
+    OPENSHIFT_ENVIRONMENT: "dev"
+  # Slave config. The remoteFS values are defined in the cluster specific config.
+  permanentNodes:
+    enabled: true
+    commonAttributes:
+      mode: NORMAL
+      numExecutors: 20
+      retentionStrategy: "always"
+    agents:
+      nzdw299v:
+        host: "nzdw299v.nz.unix.dev"
+        credentialsId: "jenkins-ssh-to-slaves"
+        labelString: "slave"
+        javaPath: "/home/x2nzadocicddsa/apps/java/latest/bin/java"
+        hostKey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDW+k3rKfZVR4rQEftvBurFOQzIToEkvgGvPuzKQt4H77KQMNyrTZt5TMBnBlL+1l7sYojiz3KT81b74uxEjCRYwAkkpRs7d4un0RAuRfzkq2lBCJD5E3Cy5EsAb+YL7KiDMrorrm+dofC5jSY7i1MG1LnlnW5+9RO5fOn9yuJcbdsAX9x7LXPAIHpYc9KXt/Kq3DwfLAZMSBEu4sKavxORMhbmWoPk1Cc2H7l5FNHWNogbyq6bjgB/hxQT05TdxPUhKNrlKFzmIeVdC2A9u8IQzgnZAWgZCRgQW3EdgfsUriKfNboMyka02rU9bnAx+kmTgmJEgJsMMtJt+fqcRHUp"
+

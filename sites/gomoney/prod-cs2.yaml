@@ -1,0 +1,4 @@
+JCasC:
+  openshiftClouds:
+    openshift_prod:
+      serverUrl: "https://api.cs2.nz.service.anz:6443"

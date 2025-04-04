@@ -1,0 +1,18 @@
+should include blank slack config in default config scripts when not configured:
+  1: |
+    |-
+      unclassified:
+        # Configure System > Slack
+        slackNotifier:
+          teamDomain: ""
+          tokenCredentialId: ""
+should include slack config in default config scripts when configured:
+  1: |
+    |-
+      unclassified:
+        # Configure System > Slack
+        slackNotifier:
+          botUser: false
+          sendAsText: false
+          teamDomain: "anznz"
+          tokenCredentialId: "slack-cred"

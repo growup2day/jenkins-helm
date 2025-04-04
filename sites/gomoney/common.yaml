@@ -1,0 +1,161 @@
+customiseRoleMapping:
+  enabled: true
+  mappings:
+    # customise role mapping to grant user with 'view' role the ability to run and cancel jobs
+    Job-Build: view,edit,admin
+    Job-Cancel: view,edit,admin
+
+# The base path to the credentials in vault accessed by Jenkins
+secretPathRoot: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/gomoney'
+
+JCasC:
+  defaultConfig: true
+
+  scriptApproval:
+    - "field hudson.model.Slave name"
+    - "method hudson.model.Computer isOnline"
+    - "method hudson.model.Hudson getSlaves"
+    - "method hudson.model.Node toComputer"
+    - "method java.util.Collection toArray"
+    - "method jenkins.model.Jenkins doReload"
+    - "method jenkins.model.Jenkins getNode java.lang.String"
+    - "staticMethod hudson.model.Hudson getInstance"
+    - "staticMethod jenkins.model.Jenkins getInstance"
+
+  master:
+    numExecutors: 2
+    #proxy: # Can be added temporarily for updating of the base image plugins, but we dont need the proxy settings normally
+      #name: "10.38.141.33"
+      #port: 80
+      #noProxyHost: |-
+        #*.service.dev
+        #*.test
+        #*.anz
+        #*.anznb.co.nz
+
+  quietDown:
+    enableScript: true
+
+  configScripts:
+    # https://plugins.jenkins.io/dark-theme
+    appearance: |
+      appearance:
+        themeManager:
+          theme: "darkSystem"
+
+    # Android automation tests put the results into a folder (html-folder) jenkins default content security policy
+    # disallows the frame/javascript required to view them
+    # This change to the content security policy allows this approach to continue working
+    # https://www.jenkins.io/doc/book/security/configuring-content-security-policy/
+    # https://stackoverflow.com/questions/34315723/jenkins-error-blocked-script-execution-in-url-because-the-documents-frame
+    content-security-policy: |
+      groovy:
+        - script: |
+            System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "default-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;")
+    anonymous-access: |
+      groovy:
+         - script: |
+            {{- .Files.Get "groovy-lib/anonymous-access-helper.groovy" | nindent 6 }}
+            setAnonymousAccess(["Overall-Read", "Job-Read", "Agent-Connect", "Agent-Create"] as String[])
+    restoration-job: |
+      jobs:
+        - script: |
+            String jobsBackupRepository = '{{ .Values.jobsBackupRepository }}'
+            String jobsBackupRepositoryBranch = '{{ .Values.jobsBackupRepositoryBranch }}'
+            {{- .Files.Get "groovy-lib/gomoney/restore-jobs-from-bitbucket-job.groovy" | nindent 6 }}
+
+  anzBitbucket:
+    enabled: true
+
+  pipelineLibraries:
+    openshift-pipeline:
+      repo: https://bitbucket.nz.service.anz/scm/pipe/openshift-pipeline.git
+      credentialsId: gomoney_bitbucket
+    gomoney:
+      repo: https://bitbucket.nz.service.anz/scm/gom/jenkinslib.git
+      credentialsId: gomoney_bitbucket
+
+  vault:
+    credentialId: "gomoney_vault_plugin_client_auth"
+    credentials:
+      gomoney_app_store_connect_key:
+        kind: vaultStringCredentialImpl
+        path: '{{ tpl .Values.secretPathRoot $ }}/appstore'
+        scope: GLOBAL
+        vaultKey: 'token'
+
+      gomoney_appetize_acceptance_android:
+        kind: vaultStringCredentialImpl
+        path: '{{ tpl .Values.secretPathRoot $ }}/appetize'
+        scope: GLOBAL
+        vaultKey: 'acceptance_android_token'
+
+      gomoney_appetize_acceptance_ios:
+        kind: vaultStringCredentialImpl
+        path: '{{ tpl .Values.secretPathRoot $ }}/appetize'
+        scope: GLOBAL
+        vaultKey: 'acceptance_ios_token'
+
+      gomoney_bitbar:
+        kind: vaultStringCredentialImpl
+        path: '{{ tpl .Values.secretPathRoot $ }}/bitbar'
+        scope: GLOBAL
+        vaultKey: 'token'
+
+      gomoney_bitbucket:
+        kind: vaultUsernamePasswordCredentialImpl
+        path: '{{ tpl .Values.secretPathRoot $ }}/bitbucket'
+        scope: GLOBAL
+
+      gomoney_bitbucket_ssh:
+        kind: vaultSSHUserPrivateKeyImpl
+        path: '{{ tpl .Values.secretPathRoot $ }}/bitbucket'
+        scope: GLOBAL
+        usernameKey: 'ssh_username'
+        privatekeyKey: 'ssh_privatekey'
+        passphraseKey: 'ssh_passphrase'
+
+      gomoney_checkmarx:
+        kind: vaultUsernamePasswordCredentialImpl
+        path: '{{ tpl .Values.secretPathRoot $ }}/checkmarx'
+        scope: GLOBAL
+
+      gomoney_confluence:
+        kind: vaultStringCredentialImpl
+        path: '{{ tpl .Values.secretPathRoot $ }}/confluence'
+        scope: GLOBAL
+        vaultKey: 'token'
+
+      gomoney_match:
+        kind: vaultStringCredentialImpl
+        path: '{{ tpl .Values.secretPathRoot $ }}/match'
+        scope: GLOBAL
+        vaultKey: 'token'
+
+      gomoney_proxy_swg:
+        kind: vaultUsernamePasswordCredentialImpl
+        path: '{{ tpl .Values.secretPathRoot $ }}/proxy_swg'
+        scope: GLOBAL
+
+      gomoney_servicenow:
+        kind: vaultUsernamePasswordCredentialImpl
+        path: '{{ tpl .Values.secretPathRoot $ }}/servicenow'
+        scope: GLOBAL
+
+      gomoney_slack:
+        kind: vaultStringCredentialImpl
+        path: '{{ tpl .Values.secretPathRoot $ }}/slack'
+        scope: GLOBAL
+        vaultKey: 'token'
+        
+      gomoney_dependencytrack:
+        kind: vaultStringCredentialImpl
+        path: '{{ tpl .Values.secretPathRoot $ }}/dependencytrack'
+        scope: GLOBAL
+        vaultKey: 'token'
+
+      gomoney_artifactory_app_distribution:
+        kind: vaultStringCredentialImpl
+        path: '{{ tpl .Values.secretPathRoot $ }}/artifactory_app_distribution'
+        scope: GLOBAL
+        vaultKey: 'token'

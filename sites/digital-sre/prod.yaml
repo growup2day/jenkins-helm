@@ -1,0 +1,202 @@
+persistentVolume:
+  storage: 50Gi
+
+buildBranchRegex: "master"
+
+JCasC:
+  # Set to configure SlackNotifier plugin
+  slackNotifier:
+    credentialId: slack
+    
+  openshiftClouds:
+    prod:
+      serverUrl: "" # to be set by prod-cs1.yaml and prod-cs2.yaml
+      namespace: "{{ .Release.Namespace }}"
+      webSocket: true
+      defaultsProviderTemplate: "default-jenkins-slave"
+      simpleTemplates:
+        templates:
+          default-jenkins-slave:
+            label: "prod"
+            image:
+              registry: ""
+            useGoInit: true
+            idleMinutes: ""
+            envVars:
+              kubernetes_backend: "{{ $.Values.JCasC.vault.mountPath }}"       
+
+  vault: # https://javadoc.jenkins.io/plugin/hashicorp-vault-plugin/com/datapipe/jenkins/vault/credentials/common/package-summary.html
+    credentials:
+      cs1-prod-openshift:
+        kind: vaultStringCredentialImpl
+        description: "OpenShift service account token for CS1 cluster"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/openshift-service-account'
+        scope: GLOBAL
+        vaultKey: "cs1-prod-openshift"
+      cs2-prod-openshift:
+        kind: vaultStringCredentialImpl
+        description: "OpenShift service account token for CS2 cluster"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/openshift-service-account'
+        scope: GLOBAL
+        vaultKey: "cs2-prod-openshift"
+
+      # IB SSH Keys            
+      PROD1_IB_SERVER_SSH_KEY:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: Credentials login into REHEARSAL1 WebSphere environment.
+        path: secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/pairs/PROD1_IB_SERVER_SSH_KEY
+        scope: GLOBAL
+
+      # CSP SSH Keys
+      PROD1_CSP_SERVER_SSH_KEY:
+        kind: vaultSSHUserPrivateKeyImpl
+        description: Credentials login into REHEARSAL1 WebSphere environment.
+        path: secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/pairs/PROD1_CSP_SERVER_SSH_KEY
+        scope: GLOBAL              
+
+
+  configScripts:
+    multi-branch-jobs: |
+      jobs:
+        - script: |
+            {{- .Files.Get "groovy-lib/multibranch-pipeline-helper.groovy" | nindent 6 }}
+            {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+            {{- .Files.Get "groovy-lib/pipeline-helper.groovy" | nindent 6 }}
+
+            def displayNameSuffix = 'Master'
+            def buildBranchRegex = 'master'
+            {{- tpl $.Values.jenkinsSlaveAnsible $ | nindent 6 }}
+
+    pipeline-jobs: |
+      jobs:
+        - script: |
+            {{- .Files.Get "groovy-lib/pipeline-helper.groovy" | nindent 6 }}
+            def buildBranch = 'master'
+            {{- tpl $.Values.StopStartIB $ | nindent 6 }}
+            {{- tpl $.Values.StopStartCSP $ | nindent 6 }}
+            {{- tpl $.Values.TrafficManagement $ | nindent 6 }}
+            {{- tpl $.Values.CheckSREServices $ | nindent 6 }}
+            {{- tpl $.Values.CertificateAutomation $ | nindent 6 }}
+            {{- tpl $.Values.IbLibertyServices $ | nindent 6 }}            
+            {{- tpl $.Values.OpsAuto $ | nindent 6 }}
+            {{- tpl $.Values.AnsibleInventory $ | nindent 6 }}
+
+# These are all multibranch jobs
+jenkinsSlaveAnsible: |
+  bitbucketMultibranchPipelineJob(
+    jobName: "Jenkins-slave-ansible",
+    displayName: "Jenkins Slave",
+    project: "DIGS",
+    repo: "jenkins-slave-ansible",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    branchRegex: buildBranchRegex,
+    shallowCloneDepth: 1000,
+    refSpecs: '+refs/heads/master:refs/remotes/@{remote}/master',
+  )
+
+# These are all pipeline jobs
+StopStartIB: |
+  bitbucketPipelineJob(
+    jobName: "Start or Stop IB",
+    displayName: "Stop or Start IB",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/digs/jenkins-jobs.git",
+    branch: buildBranch,
+    triggerBuildOnPush: false,
+    scriptPath: "stop-start-ib/Jenkinsfile",
+    shallowCloneDepth: 1,
+    pollSCMSpec: null,    
+  )
+
+StopStartCSP: |
+  bitbucketPipelineJob(
+    jobName: "Start or Stop CSP",
+    displayName: "Stop or Start CSP",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/digs/jenkins-jobs.git",
+    branch: buildBranch,
+    triggerBuildOnPush: false,
+    scriptPath: "stop-start-csp/Jenkinsfile",
+    shallowCloneDepth: 1,
+    pollSCMSpec: null,   
+  )  
+
+TrafficManagement: |
+  bitbucketPipelineJob(
+    jobName: "Traffic Management",
+    displayName: "Traffic Management",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/digs/jenkins-jobs.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    branch: buildBranch,
+    triggerBuildOnPush: false,
+    scriptPath: "traffic-management/Jenkinsfile",
+    shallowCloneDepth: 1,
+    pollSCMSpec: null,   
+  )  
+
+CheckSREServices: |
+  bitbucketPipelineJob( 
+    jobName: "Check Application Services",
+    displayName: "Check Application Services",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/digs/jenkins-jobs.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    branch: buildBranch,
+    triggerBuildOnPush: false,
+    scriptPath: "check-services/Jenkinsfile",
+    shallowCloneDepth: 1,
+    pollSCMSpec: null,
+  )
+
+CertificateAutomation: |
+  bitbucketPipelineJob( 
+    jobName: "Certificate Automation",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/digs/certificate-automation.git",
+    branch: buildBranch,
+    triggerBuildOnPush: false,
+    scriptPath: "Jenkinsfile",
+    shallowCloneDepth: 1,
+    pollSCMSpec: null,
+    parametersNeeded: true,
+    stringParams: [
+    [name: 'cname', desc: 'Common Name', trim: true],
+    [name: 'username', desc: 'Vault Username',  trim: true]],
+    passwordParams: [[name: 'password', desc: 'Vault Password']],
+    choiceParams: [[name: 'process', desc: 'Select the Process', options: ['create','upload','generate','upload_generate']]]
+  )
+
+IbLibertyServices: |
+  bitbucketPipelineJob( 
+    jobName: "IB Liberty Services",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/digs/jenkins-jobs.git",
+    branch: buildBranch,
+    triggerBuildOnPush: false,
+    scriptPath: "ib-liberty-services/Jenkinsfile",
+    shallowCloneDepth: 1,
+    pollSCMSpec: null,
+  )
+
+OpsAuto: |
+  bitbucketPipelineJob(
+    jobName: "Ops Auto",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/digs/ops-auto.git",
+    branch: "main",
+    triggerBuildOnPush: false,
+    scriptPath: "Jenkinsfile",
+    shallowCloneDepth: 1,
+    pollSCMSpec: null,
+  )
+
+AnsibleInventory: |
+  bitbucketPipelineJob(
+    jobName: "Ansible Inventory",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/digs/ansible-inventory.git",
+    branch: "main",
+    triggerBuildOnPush: false,
+    scriptPath: "Jenkinsfile",
+    shallowCloneDepth: 1,
+    pollSCMSpec: null,
+  )

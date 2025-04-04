@@ -1,0 +1,1076 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<com.sonyericsson.jenkins.plugins.bfa.PluginImpl plugin="build-failure-analyzer@2.4.0">
+  <noCausesEnabled>false</noCausesEnabled>
+  <noCausesMessage>No problems were identified. If you know why this problem occurred, please add a suitable Cause for it.</noCausesMessage>
+  <globalEnabled>true</globalEnabled>
+  <doNotAnalyzeAbortedJob>true</doNotAnalyzeAbortedJob>
+  <gerritTriggerEnabled>true</gerritTriggerEnabled>
+  <slackNotifEnabled>false</slackNotifEnabled>
+  <slackChannelName></slackChannelName>
+  <slackFailureCategories>ALL</slackFailureCategories>
+  <fallbackCategoriesAsString></fallbackCategoriesAsString>
+  <knowledgeBase class="com.sonyericsson.jenkins.plugins.bfa.db.LocalFileKnowledgeBase">
+    <causes>
+      <entry>
+        <string>86f50be4-4748-4ab8-929d-2f3825a79b4e</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>86f50be4-4748-4ab8-929d-2f3825a79b4e</id>
+          <name>DataStage Deployment Failed</name>
+          <description>DataStage Object failed to deploy. Please review deployment log and try again.</description>
+          <comment>DataStage Deployment failed</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Unexpected DatastageUnix deployment error).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-08 21:32:06.499 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>afcd758a-86f2-4c80-9c92-ed6cd8449e13</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>afcd758a-86f2-4c80-9c92-ed6cd8449e13</id>
+          <name>Oracle Deployment Failure</name>
+          <description>Deployment Pipeline failed to deploy Oracle object(s). Please check deployment logs and try again.</description>
+          <comment>Oracle object(s) failed to deploy, please try again</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(error_msg=&apos;ORA).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Unexpected Oracle deployment error).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-11 21:35:26.375 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>8eae4303-99ca-4849-8be1-17a655be2cea</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>8eae4303-99ca-4849-8be1-17a655be2cea</id>
+          <name>Pull Request Not Approved</name>
+          <description>The pull request for this branch does not have the appropriate approvers. Please have a Developer and Tester approve the Pull Request so the Pipeline can automatically start.</description>
+          <comment>User attempted to start pipeline without approvers on Pull Request</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Pull Request NOT approved by reviewer).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-17 20:28:52.44 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>3860a252-9467-4af2-9a84-63ebbaa79a7d</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>3860a252-9467-4af2-9a84-63ebbaa79a7d</id>
+          <name>Out of date branch</name>
+          <description>${1,1}</description>
+          <comment>Quickly notify users to sync their branch - copy the message from the logs out.</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Branch is not up-to-date, please pull from origin/nzdw_integration and resolve conflicts \(if any\) locally.).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-03 21:28:07.433 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>duckettn-admin-edit-view</user>
+              <time>2021-08-03 20:39:52.974 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>e8496ba0-4b67-42a9-9565-6764bf4a34c2</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>e8496ba0-4b67-42a9-9565-6764bf4a34c2</id>
+          <name>Publish Artifacts Issue</name>
+          <description>The Pipeline has had issues connecting to Artifactory to Publish or Pull Artifacts. Please wait a few minutes, update your branch, and try again.</description>
+          <comment>This shouldn&apos;t be happening</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>pipeline</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>(.*ERROR] script returned exit code 22).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2022-10-05 23:32:37.79 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2022-10-05 23:28:59.188 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2022-10-05 21:32:10.811 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2022-10-03 22:47:49.618 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2022-10-03 22:44:27.834 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2022-10-03 20:20:05.419 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>31db0085-b093-4bf5-a1bd-3b262a89a41d</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>31db0085-b093-4bf5-a1bd-3b262a89a41d</id>
+          <name> Timeout Issue</name>
+          <description>The pipeline timed-out. Please check your branch is up to date then try again.</description>
+          <comment>Timed out, try again.</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>pipeline</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Cancelling nested steps due to timeout).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Timeout waiting for evidence release-approval).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-09-07 20:36:23.864 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-08 21:30:55.704 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>836686bc-2730-4bc9-b5d1-113a92c46acf</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>836686bc-2730-4bc9-b5d1-113a92c46acf</id>
+          <name>GIT Branch Conflicts</name>
+          <description>Your branch has a conflict with another branch. Please review in BitBucket before trying again.</description>
+          <comment>GIT Branch Conflicts</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Conflicts found with another open branch).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd</user>
+              <time>2023-08-23 03:15:43.988 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>3795a8e9-3fd6-490f-9b25-db0b4bd601c9</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>3795a8e9-3fd6-490f-9b25-db0b4bd601c9</id>
+          <name>Timeout during stage</name>
+          <description>The pipeline timed out waiting for ${1,1}</description>
+          <comment>Inform user when pipeline times out waiting for evidence</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*Timeout waiting for evidence (.*)</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>duckettn-admin-edit-view</user>
+              <time>2021-08-03 22:31:09.875 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>duckettn-admin-edit-view</user>
+              <time>2021-08-03 22:19:54.487 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>4e26df78-2a40-4b61-b648-354732aa646a</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>4e26df78-2a40-4b61-b648-354732aa646a</id>
+          <name>Jenkins Restarted</name>
+          <description>Jenkins restarted during the running of this Build. If your Build failed after this message with no other errors then please update your branch and try running again. Your branch may need to be unlocked in BitBucket, please raise a Support Ticket with the Skynet team.</description>
+          <comment>Issues happening since OCP4 Migration</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>pipeline</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>(.*Resume after a restart).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd</user>
+              <time>2023-08-09 01:44:19.418 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>977eef42-2c3f-44fa-bbcd-c9694f4c75b0</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>977eef42-2c3f-44fa-bbcd-c9694f4c75b0</id>
+          <name>DataStage Object Locked</name>
+          <description>DataStage asset (object) is currently locked and cannot be overwritten.
+Please check DataStage to see who has the object opened. Close object before attempting to deploy again.</description>
+          <comment>This happens when someone has the object opened for editing or viewing in DataStage, usually when a team is developing and forget to close it before deploying via the Pipeline. If this happens in DEV01 it indicates the team is using DEV01 to develop, which they shouldn&apos;t be doing.</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(The asset is currently locked and cannot be overwritten).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd</user>
+              <time>2024-10-16 00:41:00.32 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>37aee77c-f27d-4622-ade1-12cda5d8b09f</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>37aee77c-f27d-4622-ade1-12cda5d8b09f</id>
+          <name>BT ET File in Wrong Folder</name>
+          <description>The pipeline failed to execute the ET (END TRANSACTION) statement due to how teradata/one-off .sql files are handled. Please move the file to the teradata/dml folder and try again.</description>
+          <comment>Move file to the dml folder and try again.</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>deployment_failure</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Failure 3510 Too many END TRANSACTION statements).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd</user>
+              <time>2024-10-16 02:18:53.412 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>331e40e4-6207-4e7d-ad99-6cf1c8ab1118</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>331e40e4-6207-4e7d-ad99-6cf1c8ab1118</id>
+          <name>Teradata Error</name>
+          <description>Teradata JDBC Driver Error, please restart.</description>
+          <comment>Teradata Error, restart</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>Teradata</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Teradata JDBC Driver).*(Error).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-25 21:08:29.659 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>127621c7-e459-4007-a2d1-60a2f7ee7303</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>127621c7-e459-4007-a2d1-60a2f7ee7303</id>
+          <name>Unable to Create Drivetrain Build</name>
+          <description>The pipeline was unable to create a new Drivetrain build. 
+
+&lt;br&gt;&lt;br&gt;
+
+Please advise the Skynet team of this issue and they will reach out to the Drivetrain team to resolve.
+&lt;br&gt;
+
+</description>
+          <comment>Early in the pipeline run, when trying to create a new Drivetrain build over the API, the attempt fails, returning a HTTP 405 error. This error indicates an issue on the Drivetrain side and the only way to resolve it is to reach out to the Drivetrain team to get it restarted.</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>got error HTTP response code: 405</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>ishrim</user>
+              <time>2023-08-15 23:16:02.233 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>ishrim</user>
+              <time>2023-08-15 23:15:33.520 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>ishrim</user>
+              <time>2023-08-15 23:14:08.876 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>ishrim</user>
+              <time>2023-08-15 23:13:32.518 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>ishrim</user>
+              <time>2023-08-15 23:12:55.315 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>ishrim</user>
+              <time>2023-08-15 23:04:27.273 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>ishrim</user>
+              <time>2023-08-15 23:03:41.647 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>ishrim</user>
+              <time>2023-08-15 22:58:19.867 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>a90baf2a-42b0-44af-87c7-40214d5ee771</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>a90baf2a-42b0-44af-87c7-40214d5ee771</id>
+          <name>Branch Already Running</name>
+          <description>There is already a build running using this branch. Please stop the existing build before attempting to run a new one.</description>
+          <comment>User error, running multiple builds with the same branch.</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(build failed due to existing running build).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd</user>
+              <time>2024-10-16 00:12:03.820 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>267b3fe8-af62-4db8-81e9-78038f1cfc9c</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>267b3fe8-af62-4db8-81e9-78038f1cfc9c</id>
+          <name>Vault Connectivity Issue</name>
+          <description>There was an issue connecting to Vault.</description>
+          <comment>There was an issue connecting to Vault.</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>pipeline</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(com.datapipe.jenkins.vault.exception.VaultPluginException: Key username could not be found in path).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd</user>
+              <time>2024-10-16 00:42:29.652 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>9eee0687-a1de-4585-b170-04685137bf5d</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>9eee0687-a1de-4585-b170-04685137bf5d</id>
+          <name>Check Approvers</name>
+          <description>Pull Request has insufficient Approvers to trigger the Prod Pipeline. Please check if approvers are on the list of Approved Approvers and try again.</description>
+          <comment>Approvers aren&apos;t on the list</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+              <string>pipeline</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Pull Request NOT approved by enough nominated tester).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-09-02 03:34:13.300 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>bddf456b-90f7-41a4-9b3f-11990d185d8d</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>bddf456b-90f7-41a4-9b3f-11990d185d8d</id>
+          <name>Invalid Branch Name</name>
+          <description>Pipeline has been provided the wrong Branch name. Please check and try again.</description>
+          <comment>Invalid Branch Name</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Invalid branch name).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd</user>
+              <time>2024-10-16 02:17:12.172 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>0ad1545f-0233-4ecd-a976-c28aaaea6549</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>0ad1545f-0233-4ecd-a976-c28aaaea6549</id>
+          <name>Branch Doesn&apos;t Exist</name>
+          <description>The job was run against a branch which no longer exists. If this is a Test Pipeline, check the job configuration and make sure it&apos;s set to the correct branch.</description>
+          <comment>If this is a Test Pipeline, check the job configuration and make sure it&apos;s set to the correct branch.</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>pipeline</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(ERROR: Couldn&apos;t find any revision to build. Verify the repository and branch configuration for this job).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd</user>
+              <time>2024-10-16 00:25:29.471 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>8991928d-47f6-4d9a-8929-37d678142778</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>8991928d-47f6-4d9a-8929-37d678142778</id>
+          <name>Acceptance Test Failure</name>
+          <description>Acceptance Test(s) have failed. Please review the Acceptance Test report(s) and Acceptance Test(s) then try again.</description>
+          <comment>Review Acceptance  Test(s) and try again.</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Acceptance Test FAILURE).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-03 23:40:04.109 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>d374a07a-6e54-4b72-a0c5-9f2bc983f4c9</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>d374a07a-6e54-4b72-a0c5-9f2bc983f4c9</id>
+          <name>Connection to Artifactory Failed</name>
+          <description>The Connection to Artifactory failed. Please wait a few minutes then restart your Pipeline.</description>
+          <comment>Connection to Artifactory failed, please try again.
+Connectivity Issues with Artifactory. Please wait 10-30min then try again. We are looking into this.
+Needs to be looked into. Could be something to do with the DDoS attack that happened on the 8th of September 2021.</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>restart</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Connect to artifactory.nz.service).*(failed).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Could not resolve all dependencies for configuration).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Could not resolve all files for configuration).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2022-01-13 21:53:02.229 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2022-01-12 19:58:11.841 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2022-01-12 00:42:16.190 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2022-01-11 01:13:06.895 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-09-21 22:09:41.807 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-09-15 23:18:46.994 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-08 21:28:41.674 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-03 00:53:57.775 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>05dd0846-e8c8-4b20-a6c0-547cf414309b</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>05dd0846-e8c8-4b20-a6c0-547cf414309b</id>
+          <name>Deployment Failure</name>
+          <description>The pipeline had an issue while deploying your objects. Please check the deployment pipeline logs.</description>
+          <comment>View the Deployment pipeline logs.</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>deployment_failure</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Failed Deployment - check deployment pipeline console log).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-03 03:51:49.572 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-03 00:53:10.561 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>4135d2d0-da9d-497b-9d73-b723266fe90a</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>4135d2d0-da9d-497b-9d73-b723266fe90a</id>
+          <name>Error deploying Teradata Objects</name>
+          <description>While trying to deploy an object BTEQ threw the error: 
+${1,1}
+${2,1}</description>
+          <comment>This is to detect deployment errors thrown by BTEQ and notify the users.</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*\*\*\* (Failure 3\d+ .*).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*\*\*\* (Failure 9\d+ .*).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-25 21:40:56.169 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-25 21:31:55.910 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>duckettn-admin-edit-view</user>
+              <time>2021-08-04 22:47:03.694 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-04 03:53:08.104 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-04 03:52:38.462 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-04 03:48:47.782 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-03 00:53:35.851 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>9d8931bc-1bd3-4bf7-b94a-5efaf26a24c6</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>9d8931bc-1bd3-4bf7-b94a-5efaf26a24c6</id>
+          <name>DataStage exit code recording</name>
+          <description>${1,1}</description>
+          <comment>This is to record the exit code of DataStage deployments</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>pipeline</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(command terminated with exit code).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd</user>
+              <time>2024-10-16 02:20:32.814 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>590a4e94-a963-4328-adc3-9c45934d92b5</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>590a4e94-a963-4328-adc3-9c45934d92b5</id>
+          <name>Smoke Test Failure</name>
+          <description>Smoke Tests have failed. Please review the reports and try again</description>
+          <comment>Smoke Tests Failed</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Please validate smoke test result/report).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-08 21:31:39.216 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>a736cf6b-b4d4-4a2d-8b8d-f170ad966b12</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>a736cf6b-b4d4-4a2d-8b8d-f170ad966b12</id>
+          <name>Invalid History Backfill Parameters</name>
+          <description>History Backfill table has failed. Please review the History Backfill section of the Deployment Logs and try again.</description>
+          <comment>Check the History Backfill scripts and try again.</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Need a valid business date).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Need a valid environment like &apos;DEV01&apos;).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd</user>
+              <time>2024-04-29 02:58:32.135 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>bc8e7449-84f8-41e1-9eaf-106a68f8e3ca</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>bc8e7449-84f8-41e1-9eaf-106a68f8e3ca</id>
+          <name>Temporary Folder is Full</name>
+          <description>The temporary folder within IIH is full and needs to be wiped to free up space. Please let the Skynet team know.</description>
+          <comment>A ticket will need to be lodged with the IIH team.</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>pipeline</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(cannot create temp file for here-document: No space left on device).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd</user>
+              <time>2024-10-16 00:22:14.771 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>71f7693c-97c6-4026-988b-7423a0ab3970</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>71f7693c-97c6-4026-988b-7423a0ab3970</id>
+          <name>Unit Test Failure</name>
+          <description>Unit Test(s) have failed. Please review the Unit Test report(s) and Unit Test(s) then try again.</description>
+          <comment>Review Unit Test(s) and try again.</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Downgraded Unit Test FAILURE ).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Unit Test FAILURE).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-23 20:30:51.861 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-10 00:08:42.495 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-03 23:39:35.857 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-03 03:51:34.301 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-03 00:52:44.668 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>d38ed37b-6d17-46ed-828f-af0387d007c5</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>d38ed37b-6d17-46ed-828f-af0387d007c5</id>
+          <name>Missing DataStage Project</name>
+          <description>Pipeline was unable to find the DataStage project you are trying to deploy to. Please check environment and code and try again.</description>
+          <comment>Check environment and code.</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>deployment_failure</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(ERROR: Failed to open project).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd</user>
+              <time>2024-10-16 02:17:51.752 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>5b99c13f-27b4-4270-bcb6-2883fd94e017</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>5b99c13f-27b4-4270-bcb6-2883fd94e017</id>
+          <name>Conflict with another branch</name>
+          <description>Your branch failed conflict checks against &lt;${1,1}&gt;:
+${1,2}</description>
+          <comment>Output conflict checks result to user</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*Conflicts found with another open branch: (.*) Auto-merging (.*)</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>duckettn-admin-edit-view</user>
+              <time>2021-08-03 22:26:16.860 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>duckettn-admin-edit-view</user>
+              <time>2021-08-03 22:17:00.11 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>a55b9756-d6ab-4b12-81b1-8e60bef0ed40</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>a55b9756-d6ab-4b12-81b1-8e60bef0ed40</id>
+          <name>History Backfill Failed</name>
+          <description>History Backfill Step has Failed. Please review the error in Ctl-M and Try Again</description>
+          <comment></comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Control-M job for History backfill failed).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-10-07 01:26:57.108 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>c66b46ae-7f35-4a9f-894d-6175da867b63</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>c66b46ae-7f35-4a9f-894d-6175da867b63</id>
+          <name>Pipeline Failure</name>
+          <description>Pipeline has failed, please review logs and try again.</description>
+          <comment>View the Pipeline logs.</comment>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(Failed in).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd</user>
+              <time>2024-10-16 02:19:43.111 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>ee1fac78-a096-4437-9971-d75ab1afaae9</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>ee1fac78-a096-4437-9971-d75ab1afaae9</id>
+          <name>Failed Drivetrain Evidence</name>
+          <description>Drivetrain evidence ${1,1}</description>
+          <comment>Notify users if Drivetrain has failed evidence</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*\[Drivetrain\] evidence (.* has failed, or an earlier evidence has failed) \(\{&quot;result&quot;:&quot;stop&quot;\}\).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>duckettn-admin-edit-view</user>
+              <time>2021-08-04 20:36:18.852 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>duckettn-admin-edit-view</user>
+              <time>2021-08-04 20:35:17.813 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>8ddf9737-9316-49d4-8171-340cddb4f659</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>8ddf9737-9316-49d4-8171-340cddb4f659</id>
+          <name>Code Quality Test Failed</name>
+          <description>Code Quality tests failed, please review test logs and try again.</description>
+          <comment>Code Quality Tests failed, please check</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>user</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>.*(QA Check FAILURE).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2021-08-04 01:36:50.209 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>85fd8ff5-cbd8-4bfd-a081-972724dd17bc</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>85fd8ff5-cbd8-4bfd-a081-972724dd17bc</id>
+          <name>Connection Reset</name>
+          <description>The Pipeline has suffered a connection issue. Please update your branch and try again.</description>
+          <comment>Connection to Openshift, Teradata, Artifactory, or Jenkins has failed. Please Restart</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>pipeline</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>java.net.SocketException: Connection reset</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>(.*ERROR] Connection reset).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2022-10-05 23:46:46.61 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+      <entry>
+        <string>ded30bec-0493-4e77-a986-1fbe8cf3b651</string>
+        <com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+          <id>ded30bec-0493-4e77-a986-1fbe8cf3b651</id>
+          <name>Unapproved Pipeline Script</name>
+          <description>Jenkins Pipeline is running an unapproved script. Please reach out to the Skynet team to have this fixed.</description>
+          <comment>Jenkins Pipeline is running an unapproved script. Please reach out to the Skynet team to have this fixed.</comment>
+          <categories class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>pipeline</string>
+            </a>
+          </categories>
+          <indications>
+            <com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+              <pattern>(.*script not yet approved for use).*</pattern>
+            </com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication>
+          </indications>
+          <modifications class="linked-list">
+            <com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+              <user>tillerd-admin-edit-view</user>
+              <time>2022-10-05 21:41:19.534 UTC</time>
+            </com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseModification>
+          </modifications>
+        </com.sonyericsson.jenkins.plugins.bfa.model.FailureCause>
+      </entry>
+    </causes>
+  </knowledgeBase>
+  <nrOfScanThreads>3</nrOfScanThreads>
+  <maxLogSize>0</maxLogSize>
+  <testResultParsingEnabled>false</testResultParsingEnabled>
+  <testResultCategories></testResultCategories>
+  <metricSquashingEnabled>false</metricSquashingEnabled>
+  <sodVariables>
+    <minimumSodWorkerThreads>1</minimumSodWorkerThreads>
+    <maximumSodWorkerThreads>1</maximumSodWorkerThreads>
+    <sodThreadKeepAliveTime>15</sodThreadKeepAliveTime>
+    <sodWaitForJobShutdownTimeout>30</sodWaitForJobShutdownTimeout>
+    <sodCorePoolNumberOfThreads>5</sodCorePoolNumberOfThreads>
+  </sodVariables>
+</com.sonyericsson.jenkins.plugins.bfa.PluginImpl>

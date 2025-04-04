@@ -1,0 +1,41 @@
+# A mandatory PVC to hold the Jenkins instance data (including plugins, configuration, jobs, and history)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "jenkins.fullname" . }}
+  {{- if eq .Values.persistentVolume.preventUninstall true }}
+  annotations:
+    helm.sh/resource-policy: keep
+  {{- end }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.persistentVolume.storage }}
+
+
+# Optional additional PVC's that a Jenkins instance may require. See also the persistentVolume section in values.yaml
+{{- if .Values.persistentVolume.additionalVolumes }}
+  {{- range $i, $volume := .Values.persistentVolume.additionalVolumes }}
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-%s" (include "jenkins.fullname" $) $volume.name | quote }}
+  {{- if (hasKey $volume "preventUninstall") }}
+    {{- if eq $volume.preventUninstall true }}
+  annotations:
+    helm.sh/resource-policy: keep
+    {{- end }}
+  {{- end }}
+spec:
+  accessModes:
+    - {{ $volume.accessMode }}
+  resources:
+    requests:
+      storage: {{ $volume.storage }}
+
+  {{- end }}
+{{- end }}

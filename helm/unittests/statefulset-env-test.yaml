@@ -1,0 +1,113 @@
+templates:
+  - statefulset.yaml
+tests:
+  - it: Should set the environment variable in the statefulset
+    set:
+      image:
+        tag: v4.7.2
+      env:
+        STATEFULSET_ENV: "hasValue"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: STATEFULSET_ENV
+            value: "hasValue"
+  - it: Should not set the environment variable in the statefulset when not configured
+    set:
+      image:
+        tag: v4.7.2
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: STATEFULSET_ENV
+  - it: Should allow the setting of environment variable value with whitespace
+    set:
+      image:
+        tag: v4.7.2
+      env:
+        STATEFULSET_ENV: "has whitespace"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: STATEFULSET_ENV
+            value: "has whitespace"
+  - it: Should always set the default environment variables in the statefulset
+    set:
+      image:
+        tag: v4.7.2
+    asserts:
+      - isNotNull:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: OPENSHIFT_ENABLE_OAUTH
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: KUBERNETES_TRUST_CERTIFICATES
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: OVERRIDE_PV_PLUGINS_WITH_IMAGE_PLUGINS
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: CONTAINER_HEAP_PERCENT
+            value: "0.9"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: JENKINS_JAVA_OVERRIDES
+          any: true
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: CASC_JENKINS_CONFIG
+          any: true
+  - it: Should allow the unsetting of default environment variables in the stateful set
+    set:
+      image:
+        tag: v4.7.2
+      env:
+        OPENSHIFT_ENABLE_OAUTH:
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: OPENSHIFT_ENABLE_OAUTH
+  - it: Should allow the override of default environment variables in the stateful set
+    set:
+      image:
+        tag: v4.7.2
+      env:
+        OPENSHIFT_ENABLE_OAUTH: "false"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: OPENSHIFT_ENABLE_OAUTH
+            value: "false"
+  - it: Should allow default environment variables to be set to an empty string in the stateful set
+    set:
+      image:
+        tag: v4.7.2
+      env:
+        OPENSHIFT_ENABLE_OAUTH: ""
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: OPENSHIFT_ENABLE_OAUTH
+            value: ""

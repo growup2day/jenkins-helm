@@ -1,0 +1,8 @@
+JCasC:
+  openshiftClouds:
+    openshift_cs1_dev:
+      serverUrl: "https://api.cs1-dev.nz.service.test:6443"
+      credentialsId: "ocp4-cs1-non-prod-openshift"  
+    openshift_cs1_prod:
+      serverUrl: "https://api.cs1.nz.service.anz:6443"
+      credentialsId: "ocp4-cs1-prod-openshift"

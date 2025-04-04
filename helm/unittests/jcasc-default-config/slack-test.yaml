@@ -1,0 +1,37 @@
+templates:
+  - config-jcasc.yaml
+tests:
+  - it: should include slack config in default config scripts when configured
+    set:
+      JCasC:
+        defaultConfig: true
+        slackNotifier:
+          credentialId: "slack-cred"
+    asserts:
+      - isNotNull:
+          path: data.[jcasc-default-config-slack.yaml]
+      - matchSnapshot:
+          path: data.[jcasc-default-config-slack.yaml]
+  - it: should include blank slack config in default config scripts when not configured
+    set:
+      JCasC:
+        defaultConfig: true
+    asserts:
+      - isNotNull:
+          path: data.[jcasc-default-config-slack.yaml]
+      - matchSnapshot:
+          path: data.[jcasc-default-config-slack.yaml]
+  - it: should not include slack config in default config scripts when there is custom config script for the section
+    set:
+      JCasC:
+        defaultConfig: true
+        configScripts:
+          custom-override: |
+            unclassified:
+              slackNotifier:
+                teamDomain: ""
+    asserts:
+      - isNull:
+          path: data.[jcasc-default-config-slack.yaml]
+      - isNotNull:
+          path: data.[custom-override.yaml]

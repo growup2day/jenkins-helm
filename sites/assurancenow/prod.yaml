@@ -1,0 +1,60 @@
+JCasC:
+  vault:
+    credentials:
+      openshift-cs1:
+        kind: vaultStringCredentialImpl
+        scope: GLOBAL
+        description: "Token for Jenkins service account in OpenShift 4 cs1"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/openshift-cs1-token'
+      openshift-cs2:
+        kind: vaultStringCredentialImpl
+        scope: GLOBAL
+        description: "Token for Jenkins service account in OpenShift 4 cs2"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/openshift-cs2-token'
+
+  openshiftClouds:
+    cs1:
+      serverUrl: "https://api.cs1.nz.service.anz:6443"
+      credentialsId: "openshift-cs1"
+      namespace: "{{ .Release.Namespace }}"
+      skipTlsVerify: false
+      webSocket: true
+    cs2:
+      serverUrl: "https://api.cs2.nz.service.anz:6443"
+      credentialsId: "openshift-cs2"
+      namespace: "{{ .Release.Namespace }}"
+      skipTlsVerify: false
+      webSocket: true
+    prod:
+      # serverUrl and credentialsId set by variants
+      namespace: "{{ .Release.Namespace }}"
+      skipTlsVerify: false
+      webSocket: true
+
+  configScripts:
+    multibranch-pipeline-jobs: |
+      jobs:
+        - script: |
+            {{- .Files.Get "groovy-lib/pipeline-helper.groovy" | nindent 6 }}
+            bitbucketPipelineJob(
+              jobName: "build",
+              displayName: "build",
+              gitUrl: "https://bitbucket.nz.service.anz/scm/as/assurancenow.git",
+              scriptPath: "jenkins-build.jenkinsfile",
+              credentialsId: "bitbucket",
+              branch: "master",
+              triggerBuildOnPush: true,
+              pollSCMSpec: false,
+            )
+        - script: |
+            {{- .Files.Get "groovy-lib/pipeline-helper.groovy" | nindent 6 }}
+            bitbucketPipelineJob(
+              jobName: "release",
+              displayName: "release",
+              gitUrl: "https://bitbucket.nz.service.anz/scm/as/assurancenow.git",
+              scriptPath: "jenkins-release.jenkinsfile",
+              credentialsId: "bitbucket",
+              branch: "master",
+              triggerBuildOnPush: false,
+              pollSCMSpec: false,
+            )

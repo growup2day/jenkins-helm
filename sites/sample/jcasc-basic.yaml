@@ -1,0 +1,24 @@
+JCasC:
+  configScripts:
+    system-message: |
+      jenkins:
+        systemMessage: This Jenkins is configured and managed 'as code'.
+    k8s-clouds: |
+      jenkins:
+        clouds:
+          - kubernetes:
+              name: "dev"
+              serverUrl: "https://kubernetes.default:443"
+              namespace: "{{ .Release.Namespace }}"
+              jenkinsUrl: "https://{{ include "jenkins.routeHost" $ }}"
+              jenkinsTunnel: "{{ include "jenkins.jnlpServiceName" $ }}.{{ $.Release.Namespace }}.svc.cluster.local:{{ include "jenkins.jnlpPort" $ }}"
+    master-proxy: |
+      jenkins:
+        proxy:
+          name: "10.38.34.10"
+          port: 80
+          noProxyHost: |-
+            *.service.dev
+            *.test
+            *.anz
+            *.anznb.co.nz

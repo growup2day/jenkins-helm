@@ -1,0 +1,69 @@
+customiseRoleMapping:
+  enabled: true
+  mappings:
+    # customise role mapping to grant user with 'view' role the ability to run and cancel jobs
+    Job-Build: view,edit,admin
+    Job-Cancel: view,edit,admin
+
+persistentVolume:
+  storage: 50Gi
+
+JCasC:
+  defaultConfig: true
+
+  master:
+    mode: EXCLUSIVE
+    numExecutors: 0
+    proxy:
+      name: "10.38.34.10"
+      port: 80
+      noProxyHost: |-
+        *.service.dev
+        *.test
+        *.anz
+        *.anznb.co.nz
+
+  anzBitbucket:
+    enabled: true
+
+  vault:
+    enabled: true
+
+  envVars:
+    BUILD_CONFIGURATION: 'Debug'
+    ARTIFACTORY_REPOSITORY_BASE_URL: https://artifactory-staging.nz.service.anz/artifactory/generic-bwb-pipeline-local
+    NUGET_ARTIFACTORY_URL: 'https://artifactory-staging.nz.service.anz/artifactory/api/nuget/nuget-channels-local'
+
+  permanentNodes:
+    enabled: true
+    commonAttributes:
+      numExecutors: 5
+      retentionStrategy: "always"
+      launcher:
+        jnlp:
+          webSocket: true
+          workDirSettings:
+            disabled: false
+            failIfWorkDirIsMissing: false
+            internalDir: "remoting"
+    agents:
+      APPNZ301AKL0746:
+        host: "APPNZ301AKL0746.globaltest.anz.com"
+        labelString: "opal-builder"
+        nodeDescription: "Windows agent to build OPAL"
+
+  configScripts:
+    multibranch-pipeline-jobs: |
+      jobs:
+        - script: |
+            {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+            bitbucketOrganizationFolder(
+              folderName: "OPAL",
+              displayName: "OPAL",
+              project: "OPAL",
+              repoRegex: ".*",
+              credentialsId: 'bitbucket',
+              branchRegex: 'PR-.*|feature.*|bugfix.*|hotfix.*|release.*',
+              pullRequestDiscoveryStrategyId: 1,
+              branchNamesToBuildAutomaticallyRegex: ""
+            )

@@ -1,0 +1,164 @@
+customiseRoleMapping:
+  enabled: true
+  mappings:
+    # customise role mapping to grant user with 'view' role the ability to run and cancel jobs
+    Job-Build: view,edit,admin
+    Job-Cancel: view,edit,admin
+
+podAnnotations:
+  support_wiki: "https://confluence.nz.service.anz/display/OCEH/Technical+Solution+Design+-+Document"
+  alert_group: "NZ_TSM_Public_Website"
+  server_role: "openshift_worker_node"
+  cost_centre: "89251495"
+  alerting_criticality: "low"
+  dev_contact: "NZTSMPublicWebsite@anz.com"
+  support_contact: "NZTSMPublicWebsite@anz.com"
+  Management_zone: "Omni-Digital"
+
+jenkinsSlaveImage:
+  registry: "docker-digital-image-builds-local.artifactory.nz.service.anz"
+  path: "jenkins-slave-ansible/jenkins-slave-ansible-1"
+  tag: "latest"
+
+JCasC:
+  defaultConfig: true
+
+  adminAddress: "NZTSMPublicWebsite@anz.com"
+
+  master:
+    mode: NORMAL
+    numExecutors: 5
+    proxy:
+      name: "10.38.141.33"
+      port: 80
+      noProxyHost: |-
+        *.service.dev
+        *.test
+        *.anz
+        *.anznb.co.nz
+
+  quietDown:
+    enableScript: true
+
+  anzBitbucket:
+    enabled: true
+    manageHooks: false
+    credentialsId: bitBucketUsernamePasswordCredentials
+
+  pipelineLibraries:
+    apwPipeline:
+      repo: https://bitbucket.nz.service.anz/scm/apw/anz-aem-public-website---pipeline-definition.git
+      credentialsId: bitbucketsvc
+      includeInChangesets: true
+
+  openshiftSync:
+    enabled: false
+
+  envVars:
+    ARTIFACTORY_REPOSITORY_BASE_URL: https://artifactory.nz.service.anz/artifactory
+    GIT_SSL_NO_VERIFY: "true"
+
+  scriptApproval:
+    - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods intersect java.util.List java.lang.Iterable"
+
+  vault: # https://javadoc.jenkins.io/plugin/hashicorp-vault-plugin/com/datapipe/jenkins/vault/credentials/common/package-summary.html
+    credentials:
+      bitbucketsvc:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "bitbucketsvc"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/common/secret'
+        scope: GLOBAL
+        usernameKey: "bitbucket_svc_user"
+        passwordKey: "bitbucket_svc_password"
+      gitlabsvc:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "gitlabsvc"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/common/secret'
+        scope: GLOBAL
+        usernameKey: "gitlab_svc_user"
+        passwordKey: "gitlab_svc_token"
+      proxysvc:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "proxysvc"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/common/secret'
+        scope: GLOBAL
+        usernameKey: "proxy_svc_user"
+        passwordKey: "proxy_svc_password"
+      cloudmanagersvc:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "cloudmanagersvc"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/common/secret'
+        scope: GLOBAL
+        usernameKey: "cloudmanager_svc_user"
+        passwordKey: "cloudmanager_svc_token"
+      adobeioclient:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "adobeioclient"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/common/secret'
+        scope: GLOBAL
+        usernameKey: "adobe_io_client_id"
+        passwordKey: "adobe_io_client_secret"
+      adobeiojwtkeys:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "adobeiojwtkeys"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/common/secret/'
+        scope: GLOBAL
+        usernameKey: "adobe_io_jwt_public_key"
+        passwordKey: "adobe_io_jwt_private_key"
+      fortifysvc:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "fortifysvc"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/common/secret'
+        scope: GLOBAL
+        usernameKey: "fortify_user"
+        passwordKey: "fortify_password"
+      checkmarxtoken:
+        kind: vaultStringCredentialImpl
+        description: "checkmarxtoken"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/common/secret'
+        scope: GLOBAL
+        vaultKey: "checkmarxtoken"
+      adobeioscopes:
+        kind: vaultStringCredentialImpl
+        description: "adobeioscopes"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/common/secret'
+        scope: GLOBAL
+        vaultKey: "adobe_io_scopes"
+
+
+  openshiftClouds:
+    openshift:
+      serverUrl: "" # to be set by individual variants
+      namespace: "{{ .Release.Namespace }}"
+      webSocket: true
+      defaultsProviderTemplate: "default-jenkins-slave"
+      simpleTemplates:
+        commonPodAttributes:
+          idleMinutes: 10
+          instanceCap: 8
+          yamlMergeStrategy: "override"
+        commonEnvVars:
+          TZ: "Pacific/Auckland"
+          http_proxy: ""
+          https_proxy: ""
+          CONCURRENT_BUILD_TASKS: "2"
+        templates:
+          default-jenkins-slave:
+            label: "openshift"
+            image:
+              registry: ""
+            useGoInit: true
+            idleMinutes: ""
+            envVars:
+              kubernetes_backend: "{{ $.Values.JCasC.vault.mountPath }}"
+              
+  configScripts:
+    content-security-policy: |
+      groovy:
+        - script: |
+            System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "default-src 'self'; img-src 'self' data:; font-src 'self' data:;")
+    anonymous-access: |
+      groovy:
+         - script: |
+            {{- .Files.Get "groovy-lib/anonymous-access-helper.groovy" | nindent 6 }}
+            setAnonymousAccess(["Overall-Read", "Job-Discover"] as String[])            

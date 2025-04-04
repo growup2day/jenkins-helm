@@ -1,0 +1,119 @@
+jenkins_java_overrides: -Dmail.smtp.starttls.enable=true -Dmail.smtp.ssl.trust=smtp.anz.co.nz
+
+JCasC:
+  envVars:
+    FOLD_DB_CONNECTION_STRING: "jdbc:oracle:thin:@(DESCRIPTION_LIST=(LOAD_BALANCE=OFF)(FAILOVER=ON)(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=nzp2es1c11-scan.nz.unix.anz)(PORT=41005))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=FOLDPP_PAP)))(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=nzp1es1c11-scan.nz.unix.anz)(PORT=41005))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=FOLDPP_PAP))))"
+
+  mailer:
+    smtpHost: smtp.anz.co.nz
+    smtpPort: 25
+
+  openshiftClouds:
+    # explicit cloud definition for the 2 non-prod clusters
+    openshift_cs1_prod:
+      serverUrl: "https://api.cs1.nz.service.anz:6443"
+      namespace: "{{ .Release.Namespace }}"
+      credentialsId: "cs1-prod-openshift"
+      skipTlsVerify: false
+      webSocket: true
+      # default slave for cs1
+      defaultsProviderTemplate: "maven-cs1-prod"
+      simpleTemplates:
+        commonPodAttributes:
+          idleMinutes: 10
+          instanceCap: 8
+          yamlMergeStrategy: "override"
+        commonContainerAttributes:
+          resourceRequestCpu: "200m"
+          resourceRequestMemory: "500Mi"
+          resourceLimitCpu: "4"
+          resourceLimitMemory: "10Gi"
+        commonEnvVars:
+          TZ: "Pacific/Auckland"
+          http_proxy: ""
+          https_proxy: ""
+        templates:
+          maven:
+            label: "maven-cs1-prod"
+            image:
+              registry: "docker-ose-platform-local.artifactory-staging.nz.service.anz"
+              path: "jenkins-ocp-anz/ose-jenkins-agent-maven:20230703a"
+            useGoInit: true
+            idleMinutes: ""
+            containerAttributes:
+              resourceLimitCpu: "2"
+              resourceLimitMemory: "1Gi"
+            envVars:
+              # The environment variable of the default template would be inherited for all other pod templates
+              # whether they are defined below, or with podTemplate in the pipeline
+
+              # The kubernetes_backend environment variable would be consumed by vault-helper-functions.sh in the
+              # openshift-pipeline. See:
+              # https://bitbucket.nz.service.anz/projects/PIPE/repos/openshift-pipeline/browse/resources/vault-helper-functions.sh#61-64,86
+              # It can also be used by any other code that require loading secrets from Vault
+              kubernetes_backend: "kubernetes-cs1"
+              app_domain: apps.cs1.nz.service.anz
+    openshift_cs2_prod:
+      serverUrl: "https://api.cs2.nz.service.anz:6443"
+      namespace: "{{ .Release.Namespace }}"
+      credentialsId: "cs2-prod-openshift"
+      skipTlsVerify: false
+      webSocket: true
+      # default slave for cs2
+      defaultsProviderTemplate: "maven-cs2-prod"
+      simpleTemplates:
+        commonPodAttributes:
+          idleMinutes: 10
+          instanceCap: 8
+          yamlMergeStrategy: "override"
+        commonContainerAttributes:
+          resourceRequestCpu: "200m"
+          resourceRequestMemory: "500Mi"
+          resourceLimitCpu: "4"
+          resourceLimitMemory: "10Gi"
+        commonEnvVars:
+          TZ: "Pacific/Auckland"
+          http_proxy: ""
+          https_proxy: ""
+        templates:
+          maven:
+            label: "maven-cs2-prod"
+            image:
+              registry: "docker-ose-platform-local.artifactory-staging.nz.service.anz"
+              path: "jenkins-ocp-anz/ose-jenkins-agent-maven:20230703a"
+            useGoInit: true
+            idleMinutes: ""
+            containerAttributes:
+              resourceLimitCpu: "2"
+              resourceLimitMemory: "1Gi"
+            envVars:
+              # The environment variable of the default template would be inherited for all other pod templates
+              # whether they are defined below, or with podTemplate in the pipeline
+
+              # The kubernetes_backend environment variable would be consumed by vault-helper-functions.sh in the
+              # openshift-pipeline. See:
+              # https://bitbucket.nz.service.anz/projects/PIPE/repos/openshift-pipeline/browse/resources/vault-helper-functions.sh#61-64,86
+              # It can also be used by any other code that require loading secrets from Vault
+              kubernetes_backend: "kubernetes-cs2"
+              app_domain: apps.cs2.nz.service.anz
+
+  configScripts:
+    email-ext: |
+      unclassified:
+        email-ext:
+          mailAccount:
+            smtpHost: {{ .Values.JCasC.mailer.smtpHost | quote }}
+    pipeline-jobs: |
+      jobs:
+        - script: |
+            {{- .Files.Get "groovy-lib/pipeline-helper.groovy" | nindent 6 }}
+            {{- tpl $.Values.FXEasyDealServiceProductionDeploymentSnippet $ | nindent 6 }}
+            {{- tpl $.Values.FXEasyQuoteServiceProductionDeploymentSnippet $ | nindent 6 }}
+            {{- tpl $.Values.FXEasyRatesServiceProductionDeploymentSnippet $ | nindent 6 }}
+            {{- tpl $.Values.FXEasyAdminUIProductionDeploymentSnippet $ | nindent 6 }}
+            {{- tpl $.Values.FXEasyDealUIProductionDeploymentSnippet $ | nindent 6 }}
+            {{- tpl $.Values.FXEasyCoreProductionDeploymentSnippet $ | nindent 6 }}
+            {{- tpl $.Values.FXEasyHistoricalRatesProductionDeploymentSnippet $ | nindent 6 }}
+            {{- tpl $.Values.FoldProductionDeploymentSnippet $ | nindent 6 }}
+            {{- tpl $.Values.FoldEOMReportSnippet $ | nindent 6 }}
+            {{- tpl $.Values.FoldTDReportSnippet $ | nindent 6 }}

@@ -1,0 +1,140 @@
+customiseRoleMapping:
+  enabled: true
+  mappings:
+    # customise role mapping to grant user with 'view' role the ability to run and cancel jobs
+    Job-Build: view,edit,admin
+    Job-Cancel: view,edit,admin
+
+JCasC:
+  defaultConfig: true
+  adminAddress: "NZ TSM Vault <nzvault@anz.com>"
+
+  master:
+    mode: NORMAL
+    numExecutors: 5
+    proxy:
+      name: "10.38.141.33"
+      port: 80
+      noProxyHost: |-
+        *.service.dev
+        *.test
+        *.anz
+        *.anznb.co.nz
+
+  quietDown:
+    enableScript: true
+
+  anzBitbucket:
+    enabled: true
+    manageHooks: false
+    credentialsId: bitbucket-credentials
+
+  pipelineLibraries:
+    openshiftPipeline:
+      repo: https://bitbucket.nz.service.anz/scm/pipe/openshift-pipeline.git
+      credentialsId: bitbucket-credentials
+      includeInChangesets: true
+
+  openshiftSync:
+    enabled: false
+
+  envVars:
+    ARTIFACTORY_REPOSITORY_BASE_URL: https://artifactory.nz.service.anz/artifactory
+
+  vault:
+    credentials:
+      bitbucket-credentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Service account for BitBucket access"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/bitbucket'
+        scope: GLOBAL
+        usernameKey: "username"
+        passwordKey: "password"
+      artifactory-api-key:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Service account for artifactory api access"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/artifactory'
+        scope: GLOBAL
+        usernameKey: "username"
+        passwordKey: "password"
+      artifactory-staging-credentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Service account for artifactory staging access"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/artifactory'
+        scope: GLOBAL
+        usernameKey: "artifactory_username"
+        passwordKey: "artifactory_api_key"
+      proxy-credentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Service account for proxy access"
+        path:
+          'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/proxy'
+        scope: GLOBAL
+        usernameKey: "username"
+        passwordKey: "password"
+      slack-credentials:
+        kind: vaultStringCredentialImpl
+        description: "Token for Slack Integration"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/slack'
+        scope: GLOBAL
+        vaultKey: "token"
+
+      dev-openshift-credential:
+        kind: vaultStringCredentialImpl
+        description: "OpenShift service account token for OCP3 non-prod cluster"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/openshift-service-account'
+        scope: GLOBAL
+        vaultKey: "dev-openshift-credential"
+      cs1-dev-openshift:
+        kind: vaultStringCredentialImpl
+        description: "OpenShift service account token for CS1-DEV cluster"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/openshift-service-account'
+        scope: GLOBAL
+        vaultKey: "cs1-dev-openshift"
+      cs2-dev-openshift:
+        kind: vaultStringCredentialImpl
+        description: "OpenShift service account token for CS2-DEV cluster"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/openshift-service-account'
+        scope: GLOBAL
+        vaultKey: "cs2-dev-openshift"
+      vsm-ansible-vault-secret:
+        kind: vaultStringCredentialImpl
+        description: "Ansible decrypt credential service account token for CS1-DEV cluster"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/credentials/ansible-vault-secret'
+        scope: GLOBAL
+        vaultKey: "vsm-ansible-vault-secret"
+
+  openshiftClouds:
+    # OCP3 clusters
+    dev:
+      serverUrl: "https://caas-master.nz.service.test:8443"
+      namespace: "vault-ci"
+      credentialsId: "dev-openshift-credential"
+      skipTlsVerify: false
+      webSocket: true    
+    # OCP4 2 non-prod clusters
+    openshift_cs1_dev:
+      serverUrl: "https://api.cs1-dev.nz.service.test:6443"
+      namespace: "vault-ci"
+      credentialsId: "cs1-dev-openshift"
+      skipTlsVerify: false
+      webSocket: true
+    openshift_cs2_dev:
+      serverUrl: "https://api.cs2-dev.nz.service.test:6443"
+      namespace: "vault-ci"
+      credentialsId: "cs2-dev-openshift"
+      skipTlsVerify: false
+      webSocket: true
+
+VSMJobsSnippet: |
+  bitbucketOrganizationFolder(
+    folderName: "VSM",
+    displayName: "Vault Secrets Management",
+    project: "VSM",
+    credentialsId: "bitbucket-credentials",
+    repoRegex: buildRepoRegex,
+    branchRegex: buildBranchRegex,
+  )

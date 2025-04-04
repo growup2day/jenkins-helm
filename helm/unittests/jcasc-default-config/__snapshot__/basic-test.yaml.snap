@@ -1,0 +1,24 @@
+should include basic config in default config scripts when configured:
+  1: |
+    |-
+      jenkins:
+        # Configure System > Maven Project Configuration
+        mode: "NORMAL"
+        numExecutors: 0
+      unclassified:
+        # Configure System > Jenkins Location
+        location:
+          url: "https://RELEASE-NAME-jenkins-NAMESPACE.dummy.domain/"
+          adminAddress: ""
+should reflect configured values:
+  1: |
+    |-
+      jenkins:
+        # Configure System > Maven Project Configuration
+        mode: "EXCLUSIVE"
+        numExecutors: 3
+      unclassified:
+        # Configure System > Jenkins Location
+        location:
+          url: "https://RELEASE-NAME-jenkins-NAMESPACE.dummy.domain/"
+          adminAddress: "test <test@test.com>"

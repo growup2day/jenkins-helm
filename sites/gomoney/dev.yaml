@@ -1,0 +1,13 @@
+persistentVolume:
+  storage: 50Gi
+
+jobsBackupRepository: "https://bitbucket.nz.service.anz/scm/GOM/jenkinsjobs-dev.git"
+jobsBackupRepositoryBranch: "master"
+
+JCasC:
+  openshiftClouds:
+    openshift_non_prod:
+      namespace: "{{ .Release.Namespace }}"
+      skipTlsVerify: false
+      webSocket: true
+      serverUrl: "https://api.cs1-dev.nz.service.test:6443"

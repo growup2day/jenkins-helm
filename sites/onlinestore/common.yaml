@@ -1,0 +1,189 @@
+customiseRoleMapping:
+  enabled: true
+  mappings:
+    # customise role mapping to grant user with 'view' role the ability to run and cancel jobs
+    Job-Build: view,edit,admin
+    Job-Cancel: view,edit,admin
+    
+podAnnotations:
+  support_wiki: "https://confluence.nz.service.anz/display/digitalsales/Jenkins"
+  alert_group: "NZ_TSM_RA_DIGITAL"
+  server_role: "openshift_worker_node"
+  cost_centre: "89251495"
+  alerting_criticality: "low"
+  dev_contact: "digitalsalestech@anz.com"
+  support_contact: "NZInternetBankingSupport@anz.com"
+  Management_zone: "Omni-Digital"
+
+persistentVolume:
+  storage: 50Gi
+
+JCasC:
+  defaultConfig: true
+
+  master:
+    mode: EXCLUSIVE
+    numExecutors: 1
+    proxy:
+      name: "10.38.141.33"
+      port: 80
+      noProxyHost: |-
+        *.service.dev
+        *.test
+        *.anz
+        *.anznb.co.nz
+
+  anzBitbucket:
+    enabled: true
+
+  vault:
+    enabled: true
+
+  quietDown:
+    enableScript: true
+
+  pipelineLibraries:
+    openshift-pipeline:
+      repo: https://bitbucket.nz.service.anz/scm/pipe/openshift-pipeline.git
+      credentialsId: bitbucket
+
+  scriptApproval:
+    - "method java.lang.Throwable printStackTrace"
+
+DigitalSalesSnippet: |
+  bitbucketOrganizationFolder(
+    folderName: "digital-sales",
+    displayName: "Digital Sales(feature branches)",
+    project: "AC",
+    credentialsId: "bitbucket",
+    repoRegex: 'onlinestore|salesdeliveryplatform',
+    branchRegex: 'PR-.*|bugfix.*|hotfix.*|release.*',
+    branchDiscoveryStrategyId: 1,
+    pullRequestDiscoveryStrategyId: 1
+  )
+
+DigitalSalesMasterSnippet: |
+  bitbucketOrganizationFolder(
+    folderName: "digital-sales-master",
+    displayName: "Digital Sales(master)",
+    project: "AC",
+    credentialsId: "bitbucket",
+    repoRegex: 'onlinestore|salesdeliveryplatform',
+    branchRegex: 'master',
+    branchDiscoveryStrategyId: 1,
+    pullRequestDiscoveryStrategyId: 1
+  )
+
+OLSJobsSnippet: |
+  bitbucketMultibranchPipelineJob(
+    jobName: "ols-regression",
+    displayName: "OLS Regression",
+    description: "Deploy Onlinestore to Regression Server",
+    project: "AC",
+    repo: "onlinestore",
+    credentialsId: "bitbucket",
+    scriptPath: 'PipelineJobs/test/Jenkinsfile',
+    branchRegex: 'PR-.*|feature.*|bugfix.*|hotfix.*|release.*|master',
+    noTriggerBranchProperty: true
+  )
+  bitbucketMultibranchPipelineJob(
+    jobName: "ols-stage",
+    displayName: "OLS Stage(Acceptance)",
+    description: "Deploy Onlinestore to Stage Server",
+    project: "AC",
+    repo: "onlinestore",
+    credentialsId: "bitbucket",
+    scriptPath: 'PipelineJobs/test/Jenkinsfile',
+    branchRegex: 'PR-.*|feature.*|bugfix.*|hotfix.*|release.*|master',
+    noTriggerBranchProperty: true
+  )
+  bitbucketMultibranchPipelineJob(
+    jobName: "ols-stage2",
+    displayName: "OLS Stage2",
+    description: "Deploy Onlinestore to Stage2 Server",
+    project: "AC",
+    repo: "onlinestore",
+    credentialsId: "bitbucket",
+    scriptPath: 'PipelineJobs/test/Jenkinsfile',
+    branchRegex: 'PR-.*|feature.*|bugfix.*|hotfix.*|release.*|master',
+    noTriggerBranchProperty: true
+  )
+  bitbucketMultibranchPipelineJob(
+    jobName: "ols-regression-playwright-run",
+    displayName: "OLS Regression Test(Playwright)",
+    description: "Runs OLS Playwright suite on any selected branch",
+    project: "AC",
+    repo: "onlinestore",
+    credentialsId: "bitbucket",
+    scriptPath: 'PipelineJobs/test/regression-playwright-run/Jenkinsfile',
+    branchRegex: 'PR-.*|feature.*|bugfix.*|hotfix.*|release.*',
+    noTriggerBranchProperty: true
+  )
+  bitbucketMultibranchPipelineJob(
+    jobName: "ols-regression-Selenium-run",
+    displayName: "OLS Regression Test(Selenium)",
+    description: "Runs OLS Selenium suite on any selected branch",
+    project: "AC",
+    repo: "onlinestore",
+    credentialsId: "bitbucket",
+    scriptPath: 'PipelineJobs/test/regression-selenium-run/Jenkinsfile',
+    branchRegex: 'PR-.*|feature.*|bugfix.*|hotfix.*|release.*',
+    noTriggerBranchProperty: true
+  )
+
+SDPJobsSnippet: |
+  bitbucketMultibranchPipelineJob(
+    jobName: "sdp-regression",
+    displayName: "SDP Regression",
+    description: "Deploy SDP to Regression Server",
+    project: "AC",
+    repo: "salesdeliveryplatform",
+    credentialsId: "bitbucket",
+    scriptPath: 'PipelineJobs/test/Jenkinsfile',
+    branchRegex: 'PR-.*|feature.*|bugfix.*|hotfix.*|release.*|master',
+    noTriggerBranchProperty: true
+  )
+  bitbucketMultibranchPipelineJob(
+    jobName: "sdp-stage",
+    displayName: "SDP Stage(Acceptance)",
+    description: "Deploy SDP to Stage Server",
+    project: "AC",
+    repo: "salesdeliveryplatform",
+    credentialsId: "bitbucket",
+    scriptPath: 'PipelineJobs/test/Jenkinsfile',
+    branchRegex: 'PR-.*|feature.*|bugfix.*|hotfix.*|release.*|master',
+    noTriggerBranchProperty: true
+  )
+  bitbucketMultibranchPipelineJob(
+    jobName: "sdp-stage2",
+    displayName: "SDP Stage2",
+    description: "Deploy SDP to Stage2 Server",
+    project: "AC",
+    repo: "salesdeliveryplatform",
+    credentialsId: "bitbucket",
+    scriptPath: 'PipelineJobs/test/Jenkinsfile',
+    branchRegex: 'PR-.*|feature.*|bugfix.*|hotfix.*|release.*|master',
+    noTriggerBranchProperty: true
+  )
+  bitbucketMultibranchPipelineJob(
+    jobName: "sdp-regression-playwright-run",
+    displayName: "SDP Regression Test(Playwright)",
+    description: "Runs SDP Playwright suite on any selected branch",
+    project: "AC",
+    repo: "salesdeliveryplatform",
+    credentialsId: "bitbucket",
+    scriptPath: 'PipelineJobs/test/regression-playwright-run/Jenkinsfile',
+    branchRegex: 'PR-.*|feature.*|bugfix.*|hotfix.*|release.*',
+    noTriggerBranchProperty: true
+  )
+  bitbucketMultibranchPipelineJob(
+    jobName: "sdp-regression-selenium-run",
+    displayName: "SDP Regression Test(Selenium)",
+    description: "Runs SDP Selenium suite on any selected branch",
+    project: "AC",
+    repo: "salesdeliveryplatform",
+    credentialsId: "bitbucket",
+    scriptPath: 'PipelineJobs/test/regression-selenium-run/Jenkinsfile',
+    branchRegex: 'PR-.*|feature.*|bugfix.*|hotfix.*|release.*',
+    noTriggerBranchProperty: true
+  )

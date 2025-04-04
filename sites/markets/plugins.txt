@@ -1,0 +1,19 @@
+# Note: breaking changes at next kubernetes plugin version. See https://plugins.jenkins.io/kubernetes/releases/
+kubernetes:4246.v5a_12b_1fe120e
+# Later version of the openshift plugin will require a later version of Jenkkins.
+openshift-client:1.1.0.424.v829cb_ccf8798
+
+# Integration with NZ Vault
+hashicorp-vault-plugin:368.v48134f694db_f
+
+# Plugins for Market team pipelines
+jacoco:3.3.4
+ws-cleanup:0.46
+resource-disposer:0.23
+soapui-pro-functional-testing:1.10
+# Later versions of performance require gson-api versions that require a later version of Jenkins.
+performance:951.v5600a_c6422ed
+concordionpresenter:0.7
+
+# Used for sending Fold EOM reports via email
+email-ext:2.102

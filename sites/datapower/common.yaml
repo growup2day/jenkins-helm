@@ -1,0 +1,395 @@
+JCasC:
+  defaultConfig: true
+  adminAddress: "NZ Integration Jenkins <NZjenkinstomcatdsa@anz.com>"
+
+  master:
+    mode: NORMAL
+    numExecutors: 5
+    proxy:
+      name: "10.38.141.33"
+      port: 80
+      noProxyHost: |-
+        *.service.dev
+        *.test
+        *.anz
+        *.anznb.co.nz
+
+  quietDown:
+    enableScript: true
+
+  anzBitbucket:
+    enabled: true
+    manageHooks: false
+    credentialsId: bitBucketUsernamePasswordCredentials
+
+  pipelineLibraries:
+    openshiftPipeline:
+      repo: https://bitbucket.nz.service.anz/scm/pipe/openshift-pipeline.git
+      credentialsId: bitBucketUsernamePasswordCredentials
+      includeInChangesets: true
+    datapowerPipelineBB:
+      repo: https://bitbucket.nz.service.anz/scm/int/jenkins-pipeline-os.git
+      credentialsId: bitBucketUsernamePasswordCredentials
+      includeInChangesets: true
+    makinuiServicesPipeline:
+      repo: https://bitbucket.nz.service.anz/scm/int/jenkins-pipeline-os.git
+      credentialsId: bitBucketUsernamePasswordCredentials
+      includeInChangesets: true
+    datapowerOperations:
+      repo: https://bitbucket.nz.service.anz/scm/int/jenkins-pipeline-os.git
+      credentialsId: bitBucketUsernamePasswordCredentials
+      includeInChangesets: true
+
+  openshiftSync:
+    enabled: false
+
+  vault: #Add all values from NZ Vault
+    credentials:
+      datapowerUsernamePasswordCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "datapower device creds"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" .}}/pairs/datapowerCredentialsId'
+        scope: GLOBAL
+        usernameKey: "username"
+        passwordKey: "password"
+      bitBucketUsernamePasswordCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "BitBucket creds"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" .}}/pairs/bitBucketUsernamePasswordCredentials'
+        scope: GLOBAL
+        usernameKey: "username"
+        passwordKey: "password"
+      artifactoryUsernameApiKeyCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Username and API Key for Artifactory"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" .}}/pairs/artifactoryUsernameApiKeyCredentials'
+        scope: GLOBAL
+        usernameKey: "username"
+        passwordKey: "password"
+      dpbackupID:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "datapower backup creds used by DP_ScheduleBackup_Trigger_Upload and DP_BackupRestore pipeline jobs"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" .}}/pairs/dpbackupID'
+        scope: GLOBAL
+        usernameKey: "username"
+        passwordKey: "password"
+      dpbackupID_Q:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "creds for dataPower nmon data download for B2B"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/pairs/dpbackupID_Q'
+        scope: GLOBAL
+        usernameKey: "username"
+        passwordKey: "password"
+      nzintegrationnpmdsa:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "Artifactory user id and password"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/pairs/nzintegrationnpmdsa'
+        scope: GLOBAL
+        usernameKey: "username"
+        passwordKey: "password"
+      devArtifactoryUsernameApiKeyCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "dev artifactory creds"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/pairs/devArtifactoryUsernameApiKeyCredentials'
+        scope: GLOBAL
+        usernameKey: "username"
+        passwordKey: "password"
+      jenkinsServiceAccountCredentials:
+        kind: vaultUsernamePasswordCredentialImpl
+        description: "jenkins service account creds"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/pairs/jenkinsServiceAccount'
+        scope: GLOBAL
+        usernameKey: "username"
+        passwordKey: "password"
+      integrationSlackToken:
+        kind: vaultStringCredentialImpl
+        description: "integrationSlackToken"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "integrationSlackToken"
+      drivetrain-shared-private-key:
+        kind: vaultStringCredentialImpl
+        description: "API Key to access Drivetrain E2E instance"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "drivetrain-shared-private-key"
+      dependency-track-api-key:
+        kind: vaultStringCredentialImpl
+        description: "dependency-track-api-key"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "dependency-track-api-key"
+
+      # Openshift credentials
+      ocp4-cs1-non-prod-openshift:
+        kind: vaultStringCredentialImpl
+        description: "OpenShift service account token for OCP4 cs1 cluster - non prod"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "openshift_v4_cs1_token"
+      ocp4-cs2-non-prod-openshift:
+        kind: vaultStringCredentialImpl
+        description: "OpenShift service account token for OCP4 cs2 cluster - non prod"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "openshift_v4_cs2_token"
+      IntegrationTestPwd:
+        kind: vaultStringCredentialImpl
+        description: "credential used by mod service developed by integration dev team"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "IntegrationTestPwd"
+      AUTokenClientKey:
+        kind: vaultStringCredentialImpl
+        description: "credential used by mod service developed by integration dev team"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "AUTokenClientKey"
+      nzfxtransvcPassword:
+        kind: vaultStringCredentialImpl
+        description: "credential used by mod service developed by integration dev team"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "nzfxtransvcPassword"
+      FoldPspPassword:
+        kind: vaultStringCredentialImpl
+        description: "credential used by mod service developed by integration dev team"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "FoldPspPassword"
+      FXEasyPassword:
+        kind: vaultStringCredentialImpl
+        description: "credential used by mod service developed by integration dev team"
+        path: 'secret/context/{{ .Release.Namespace }}/{{ include "jenkins.serviceAccountName" . }}/keys'
+        scope: GLOBAL
+        vaultKey: "FXEasyPassword"
+
+  openshiftClouds:
+    openshift_cs1_dev:
+      serverUrl: "https://api.cs1-dev.nz.service.test:6443"
+      namespace: "integ-ops-build"
+      credentialsId: "ocp4-cs1-non-prod-openshift"
+      skipTlsVerify: false
+      webSocket: true
+    openshift_cs2_dev:
+      serverUrl: "https://api.cs2-dev.nz.service.test:6443"
+      namespace: "integ-ops-build"
+      credentialsId: "ocp4-cs2-non-prod-openshift"
+      skipTlsVerify: false
+      webSocket: true
+
+  configScripts:
+    anonymous-access: |
+      groovy:
+         - script: |
+            {{- .Files.Get "groovy-lib/anonymous-access-helper.groovy" | nindent 6 }}
+            setAnonymousAccess(["Overall-Read", "Job-Read"] as String[])
+    appearance: |
+      appearance:
+        themeManager:
+          theme: "darkSystem"
+
+
+#job configuration
+modLibrariesJobSnippet: |
+  bitbucketOrganizationFolder(
+    folderName: "MoD Libraries",
+    displayName: "MoD Libraries",
+    project: "INT",
+    repoRegex: "lib.*",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    scriptPath: "Jenkinsfile",
+    branchRegex: buildBranchRegex,
+    periodicScanInterval: '1d',
+    branchNamesToBuildAutomaticallyRegex: "",
+  )
+nodejsLibrariesJobSnippet: |
+  bitbucketOrganizationFolder(
+    folderName: "NodeJS Libraries",
+    displayName: "NodeJS Libraries",
+    project: "IM",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    repoRegex: "lib.*",
+    scriptPath: "Jenkinsfile",
+    branchRegex: buildBranchRegex,
+    periodicScanInterval: '1d',
+    branchNamesToBuildAutomaticallyRegex: "",
+  )
+openshiftPipelineJobSnippet: |
+  bitbucketOrganizationFolder(
+    folderName: "Integration Openshift",
+    displayName: "Integration Openshift",
+    project: "IM",
+    repoRegex: "^((?!.*mu-.*|.*lib-.*|.*ob-accounts.*|.*genesys-api.*|.*my-mu.*).)*",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    scriptPath: "Jenkinsfile",
+    branchRegex: buildBranchRegex,
+    periodicScanInterval: '1d',
+    branchNamesToBuildAutomaticallyRegex: "",
+  )
+
+artifactoryBackupUploadPipelineJobSnippet: |
+  bitbucketPipelineJob(
+    jobName: "DP_ArtifactoryBackupUpload_Corp",
+    displayName: "DP_ArtifactoryBackupUpload_Corp",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/iu/datapower-operation-os.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    scriptPath: "DP_Backup/DP_ArtifactoryBackupUpload_Corp.groovy",
+    branch: buildBranchRegex,
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+  )
+artifactorySyncPipelineJobSnippet: |
+  bitbucketPipelineJob(
+    jobName: "DP_ArtifactorySync",
+    displayName: "DP_ArtifactorySync",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/iu/datapower-operation-os.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    scriptPath: "Artifactory_Sync/JenkinsFileArtifactory",
+    branch: buildBranchRegex,
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+  )
+backupandRestorePipelineJobSnippet: |
+  bitbucketPipelineJob(
+    jobName: "DP_BackupAndRestore",
+    displayName: "DP_BackupAndRestore",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/iu/datapower-operation-os.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    scriptPath: "DP_Backup_Restore/DP_BackupRestore.groovy",
+    branch: buildBranchRegex,
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+  )
+deviceremovalfromloadblancerPipelineJobSnippet: |
+  bitbucketPipelineJob(
+    jobName: "DP_DeviceremovalFromLoadblancer",
+    displayName: "DP_DeviceremovalFromLoadblancer",
+    gitUrl: "https://bitbucket.nz.service.anz/projects/IU/repos/datapower_operation.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    scriptPath: "Dp_loadblancer.groovy",
+    branch: buildBranchRegex,
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+  )
+cleanWorkspacesPipelineJobSnippet: |
+  bitbucketPipelineJob(
+    jobName: "DP_CleanWorkspaces",
+    displayName: "DP_CleanWorkspaces",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/iu/datapower-operation-os.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    scriptPath: "DP_CleanWorkspaces.groovy",
+    branch: buildBranchRegex,
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+  )
+download_NMon_dataPipelineJobSnippet: |
+  bitbucketPipelineJob(
+    jobName: "DP_Download_NMon_Data",
+    displayName: "DP_Download_NMon_Data",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/iu/datapower-operation-os.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    scriptPath: "DP_nmon.groovy",
+    branch: buildBranchRegex,
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+  )
+dp_schedule_nmon_downloadPipelineJobSnippet: |
+  bitbucketPipelineJob(
+    jobName: "DP_Schedule_NMon_Download",
+    displayName: "DP_Schedule_NMon_Download",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/iu/datapower-operation-os.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    scriptPath: "DP_nmon_all.groovy",
+    branch: buildBranchRegex,
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+  )
+dpBackup_corpPipelineJobSnippet: |
+  bitbucketPipelineJob(
+    jobName: "DP_NonSecureBackup_Corp",
+    displayName: "DP_NonSecureBackup_Corp",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/iu/datapower-operation-os.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    scriptPath: "DP_Backup/DP_Backup_Corp.groovy",
+    branch: buildBranchRegex,
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+  )
+dp_rebootPipelineJobSnippet: |
+  bitbucketPipelineJob(
+    jobName: "DP_Reboot",
+    displayName: "DP_Reboot",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/iu/datapower-operation-os.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    scriptPath: "DP_Reboot.groovy",
+    branch: buildBranchRegex,
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+  )
+dp_errorReportPipelineJobSnippet: |
+  bitbucketPipelineJob(
+    jobName: "DP_ErrorReport",
+    displayName: "DP_ErrorReport",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/iu/datapower-operation-os.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    scriptPath: "DP_ErrorReport.groovy",
+    branch: buildBranchRegex,
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+  )
+dp_packetCapturePipelineJobSnippet: |
+  bitbucketPipelineJob(
+    jobName: "DP_PacketCapture",
+    displayName: "DP_PacketCapture",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/iu/datapower-operation-os.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    scriptPath: "DP_PacketCapture.groovy",
+    branch: buildBranchRegex,
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+  )
+dp_quiesce_unquiescePipelineJobSnippet: |
+  bitbucketPipelineJob(
+    jobName: "DP_Quiesce_Unquiesce",
+    displayName: "DP_Quiesce_Unquiesce",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/iu/datapower-operation-os.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    scriptPath: "DP_QuiesceUnquiesce.groovy",
+    branch: buildBranchRegex,
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+  )
+dp_scheduleBackup_trigger_uploadPipelineJobSnippet: |
+  bitbucketPipelineJob(
+    jobName: "DP_ScheduleBackup_Trigger_Upload",
+    displayName: "DP_ScheduleBackup_Trigger_Upload",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/iu/datapower-operation-os.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    scriptPath: "DP_Backup/DP_ScheduleBackup_Trigger_Upload.groovy",
+    branch: buildBranchRegex,
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+  )
+tcpConnectionTestPipelineJobSnippet: |
+  bitbucketPipelineJob(
+    jobName: "DP_TCP_ConnectionTest",
+    displayName: "DP_TCP_ConnectionTest",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/iu/datapower-operation-os.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    scriptPath: "DP_TCP_ConnectionTest.groovy",
+    branch: buildBranchRegex,
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+  )
+dp_Mod_Version_ListPipelineJobSnippet: |
+  bitbucketPipelineJob(
+    jobName: "DP_Mod_Version_List",
+    displayName: "DP_Mod_Version_List",
+    gitUrl: "https://bitbucket.nz.service.anz/scm/iu/datapower-operation-os.git",
+    credentialsId: "bitBucketUsernamePasswordCredentials",
+    scriptPath: "DP_ListCurrentVersions.groovy",
+    branch: buildBranchRegex,
+    triggerBuildOnPush: false,
+    pollSCMSpec: null,
+  )

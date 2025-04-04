@@ -1,0 +1,121 @@
+default manifest should match snapshot:
+  1: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        service.alpha.openshift.io/dependencies: '[{"name": "RELEASE-NAME-jenkins-jnlp",
+          "namespace": "", "kind": "Service"}]'
+        service.openshift.io/infrastructure: "true"
+      labels:
+        app: RELEASE-NAME-jenkins
+        app.kubernetes.io/managed-by: Helm
+        helm.sh/chart: jenkins-0.7.0
+        name: RELEASE-NAME-jenkins
+        release-name: RELEASE-NAME
+      name: RELEASE-NAME-jenkins
+    spec:
+      ports:
+      - name: http
+        port: 80
+        protocol: TCP
+        targetPort: 8080
+      selector:
+        name: RELEASE-NAME-jenkins
+      sessionAffinity: None
+      type: ClusterIP
+manifest should match snapshot when jnlp service enabled:
+  1: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        service.alpha.openshift.io/dependencies: '[{"name": "RELEASE-NAME-jenkins-jnlp",
+          "namespace": "", "kind": "Service"}]'
+        service.openshift.io/infrastructure: "true"
+      labels:
+        app: RELEASE-NAME-jenkins
+        app.kubernetes.io/managed-by: Helm
+        helm.sh/chart: jenkins-0.7.0
+        name: RELEASE-NAME-jenkins
+        release-name: RELEASE-NAME
+      name: RELEASE-NAME-jenkins
+    spec:
+      ports:
+      - name: http
+        port: 80
+        protocol: TCP
+        targetPort: 8080
+      selector:
+        name: RELEASE-NAME-jenkins
+      sessionAffinity: None
+      type: ClusterIP
+  2: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: RELEASE-NAME-jenkins
+        app.kubernetes.io/managed-by: Helm
+        helm.sh/chart: jenkins-0.7.0
+        name: RELEASE-NAME-jenkins
+        release-name: RELEASE-NAME
+      name: RELEASE-NAME-jenkins-jnlp
+    spec:
+      ports:
+      - name: agent
+        port: 50000
+        protocol: TCP
+        targetPort: 50000
+      selector:
+        name: RELEASE-NAME-jenkins
+      sessionAffinity: None
+      type: ClusterIP
+manifest should match snapshot when jnlp service enabled with nodePort:
+  1: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        service.alpha.openshift.io/dependencies: '[{"name": "RELEASE-NAME-jenkins-jnlp",
+          "namespace": "", "kind": "Service"}]'
+        service.openshift.io/infrastructure: "true"
+      labels:
+        app: RELEASE-NAME-jenkins
+        app.kubernetes.io/managed-by: Helm
+        helm.sh/chart: jenkins-0.7.0
+        name: RELEASE-NAME-jenkins
+        release-name: RELEASE-NAME
+      name: RELEASE-NAME-jenkins
+    spec:
+      ports:
+      - name: http
+        port: 80
+        protocol: TCP
+        targetPort: 8080
+      selector:
+        name: RELEASE-NAME-jenkins
+      sessionAffinity: None
+      type: ClusterIP
+  2: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: RELEASE-NAME-jenkins
+        app.kubernetes.io/managed-by: Helm
+        helm.sh/chart: jenkins-0.7.0
+        name: RELEASE-NAME-jenkins
+        release-name: RELEASE-NAME
+      name: RELEASE-NAME-jenkins-jnlp
+    spec:
+      ports:
+      - name: agent
+        nodePort: 34567
+        port: 50000
+        protocol: TCP
+        targetPort: 50000
+      selector:
+        name: RELEASE-NAME-jenkins
+      sessionAffinity: None
+      type: NodePort

@@ -1,0 +1,47 @@
+# Non-Prod BWB Jenkins requires higher CPU/RAM limit
+resources:
+  limits:
+    cpu: "2"
+    memory: "4Gi"
+  requests:
+    cpu: "1"
+    memory: "4Gi"
+
+persistentVolume:
+  storage: 50Gi
+
+JCasC:
+  permanentNodes:
+    enabled: true
+    commonAttributes:
+      mode: EXCLUSIVE
+      numExecutors: 5
+      retentionStrategy: "always"
+      launcher:
+        jnlp:
+          webSocket: true
+          workDirSettings:
+            disabled: false
+            failIfWorkDirIsMissing: false
+            internalDir: "remoting"
+    agents:
+      APPNZ301AKL0731:
+        host: "APPNZ301AKL0731.globaltest.anz.com"
+        labelString: "Windows"
+        nodeDescription: "windows slave to run journey tests"
+
+  configScripts:
+    multi-branch-jobs: |
+      jobs:
+        - script: |
+            {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+
+            def buildBranchRegex = 'feature.*|bugfix.*|hotfix.*'
+            def displayNameSuffix = 'Feature Branches'
+            {{- tpl $.Values.OMLibsJobsSnippet $ | nindent 6 }}
+
+            {{- tpl $.Values.OMJobsSnippet $ | nindent 6 }}
+
+  vault:
+    enabled: true
+    vaultUrl: "https://vault-preprod.nzlb.service.test:8200"

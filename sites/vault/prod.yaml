@@ -1,0 +1,44 @@
+persistentVolume:
+  storage: 50Gi
+
+buildBranchRegex: "master"
+
+JCasC:
+  vault:
+    vaultUrl: "https://vault.nzlb.service.anz:8200"
+    # Set to configure SlackNotifier plugin
+  slackNotifier:
+    credentialId: slack
+
+  openshiftClouds:
+    # OCP3 clusters
+    prod:
+      serverUrl: "https://caas-master.nzlb.service.anz:8443"
+      namespace: "vault-ci"
+      credentialsId: "prod-openshift-credentials"
+      skipTlsVerify: false
+      webSocket: true  
+    # OCP4 2 prod clusters
+    openshift_cs1_prod:
+      serverUrl: "https://api.cs1.nz.service.anz:6443"
+      namespace: "vault-ci"
+      credentialsId: "cs1-prod-openshift"
+      skipTlsVerify: false
+      webSocket: true
+    openshift_cs2_prod:
+      serverUrl: "https://api.cs2.nz.service.anz:6443"
+      namespace: "vault-ci"
+      credentialsId: "cs2-prod-openshift"
+      skipTlsVerify: false
+      webSocket: true
+
+  configScripts:
+    multi-branch-jobs: |
+      jobs:
+        - script: |
+            {{- .Files.Get "groovy-lib/organization-folder-helper.groovy" | nindent 6 }}
+      
+            def buildBranchRegex = 'master'
+      
+            def buildRepoRegex = '.*'
+            {{- tpl $.Values.VSMJobsSnippet $ | nindent 6 }}

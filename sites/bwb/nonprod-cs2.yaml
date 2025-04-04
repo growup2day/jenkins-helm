@@ -1,0 +1,13 @@
+JCasC:
+  quietDown:
+    # cs2 cluster contains the backup instance, in quiet down mode by default
+    quietDown: true
+
+  openshiftClouds:
+    openshift_non_prod:
+      serverUrl: "https://api.cs2-dev.nz.service.test:6443"
+      credentialsId: "cs2-dev-openshift"
+
+  permanentNodes:
+    commonAttributes:
+      remoteFS: "C:\\AgentWorkspaceCluster2"
